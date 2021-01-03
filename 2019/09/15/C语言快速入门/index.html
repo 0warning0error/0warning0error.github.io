@@ -1,0 +1,1314 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="C语言快速入门(新), 编程之眼">
+    <meta name="description" content="
+本文仅涉及C语言的语法，而不介绍具体的函数功能，函数功能可以看API手册上面的函数介绍。本文偏向于总结形式，所写的内容遵循的标准是C89/C99标准。此文在原来的基础上进行了修改。
+
+C语言是建立在汇编语言之上的中级语言，常常用于编写底层">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>C语言快速入门(新) | 编程之眼</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    <style type="text/css">
+        
+    </style>
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">编程之眼</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/tags" class="waves-effect waves-light">
+            
+            <i class="fa fa-tags"></i>
+            
+            <span>标签</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/categories" class="waves-effect waves-light">
+            
+            <i class="fa fa-bookmark"></i>
+            
+            <span>分类</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/friends" class="waves-effect waves-light">
+            
+            <i class="fa fa-address-book"></i>
+            
+            <span>友情链接</span>
+        </a>
+    </li>
+    
+    <li>
+        <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+            <i id="searchIcon" class="fa fa-search" title="搜索"></i>
+        </a>
+    </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">编程之眼</div>
+        <div class="logo-desc">
+            
+            用计算机改变世界，用代码改善生活
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/tags" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-tags"></i>
+                
+                标签
+            </a>
+        </li>
+        
+        <li>
+            <a href="/categories" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-bookmark"></i>
+                
+                分类
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于
+            </a>
+        </li>
+        
+        <li>
+            <a href="/friends" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-address-book"></i>
+                
+                友情链接
+            </a>
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fa fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/4.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        C语言快速入门(新)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/C%E8%AF%AD%E8%A8%80/" target="_blank">
+                                <span class="chip bg-color">C语言</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%85%A5%E9%97%A8/" target="_blank">
+                                <span class="chip bg-color">入门</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                <div class="post-date info-break-policy">
+                    <i class="fa fa-calendar-minus-o fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2019-09-15
+                </div>
+
+                
+				
+				
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="fa fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>本文仅涉及C语言的语法，而不介绍具体的函数功能，函数功能可以看API手册上面的函数介绍。本文偏向于总结形式，所写的内容遵循的标准是C89/C99标准。此文在原来的基础上进行了修改。</p>
+</blockquote>
+<p><br><br>C语言是建立在汇编语言之上的中级语言，常常用于编写底层程序，嵌入式程序等</p>
+<p>开始之前，你可能需要知道这些东西：</p>
+<ol>
+<li>内存，寄存器等存放的内容断电以后就会丢失，而且新的数据填入内存后，旧的内容就会被覆盖。</li>
+<li>电脑是以二进制存储内容的（客观），冯诺依曼体系是数据和代码存储在一起的。也就是说，存储的东西是数据还是代码是人定义的，电脑本身并不知道某一段内容是数据还是代码。（哈佛结构则将数据和代码分开）</li>
+<li>存储的数据超过设定的容量就会发生溢出，可能会丢失一部分数据。</li>
+</ol>
+<p>在C语言中,单独一个语句的结束标志是西文的分号;不管你的语句是放在了一行还是单独另起一行，但是，如果是花括号构成的复合语句（准确来说整体的语句结束时的末尾为右花括号｝），一般情况下分号可以省略    </p>
+<pre class=" language-lang-c"><code class="language-lang-c">int a;
+&#123;
+    int b = a++;
+    b += a;
+&#125;
+</code></pre>
+<h2 id="标识符"><a href="#标识符" class="headerlink" title="标识符"></a>标识符</h2><p>标识符是开发者编程的时候用的名字，C语言对标识符的命名有以下规定</p>
+<ul>
+<li>不能和当前的关键词同名,同一个作用域标识符不能重名</li>
+<li>标识符大小写是有区别的</li>
+<li>开头只能是字母和_,后面可以是字母,数字和_<br>满足以上条件，命名是自由的，但是好的标识符可为以后的开发维护带来诸多方便。这里介绍几个常用方法</li>
+</ul>
+<h3 id="小驼峰命令法"><a href="#小驼峰命令法" class="headerlink" title="小驼峰命令法"></a>小驼峰命令法</h3><p>由其术语能联想到，它混合使用大小写字母来构成变量和函数的名字。许多新的函数库和Windows命令中，使用得当相多。不过实际工程多用于命名变量。</p>
+<pre><code>isEnabled
+schoolName
+</code></pre><h3 id="大驼峰命令法"><a href="#大驼峰命令法" class="headerlink" title="大驼峰命令法"></a>大驼峰命令法</h3><p>和小驼峰不同的是，大驼峰的首字母大写，实际多用于类型名</p>
+<pre><code>VelocityResponseWriter
+InputStream
+</code></pre><h3 id="匈牙利命名法-已删除"><a href="#匈牙利命名法-已删除" class="headerlink" title="匈牙利命名法(已删除)"></a>匈牙利命名法(已删除)</h3><p>实际项目没人用，有兴趣可自查</p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h3 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h3><p>char（character）：表示一个字符的编码。在被用于进行数学运算或者位运算的时候会被视为普通的整数类型，而在其他的情况则会与其他的整数类型区别对待，比如在输出成文字的时候系统会按照字符的某一种编码（ASCII码，GB2312，utf-8，big5码等）根据其值寻找对应的文字，然后按照这个文字的显示方式（字体）和各种参数显示或者输出。通常在编译器的设定里为1B</p>
+<p>int（integer）：常用的有符号整数类型(有符号的整数使用补码存储)，能够表示比较大的整数，参与数学运算或者位运算。而short类型，long类型和int类型的区别是存储的数值范围是long&gt;=int&gt;=short&gt;=char</p>
+<p>unsigned：整数类型的修饰符，表示整数变量没有负数，不用考虑数学的符号，在表示unsigned int时候，int可以省略。</p>
+<p>注：C语言没有专门表示逻辑的类型和常量，用整数表示逻辑真假时，用0表示假，非零表示真。逻辑转换为整数时，真为1，假为0。在C99里，引入了一个新的数据类型_Bool型专门表示逻辑类型，虽然实际上它也是属于整数类型，但只能为0或1，true或者false</p>
+<p>浮点数类型能表示一定范围和精度带符号的小数，有double和float。表示范围的大小long double&gt;=double&gt;=float，它们的存储方式请自行搜索。</p>
+<p>void：特殊的类型，它表示什么类型都不是。一般用在函数的声明和定义表示不返回数据。</p>
+<p>声明变量的格式是     数据类型 标识符;</p>
+<blockquote>
+<p>在C89标准里变量定义必须在前面，而C99标准可以把变量的定义放在任意位置</p>
+</blockquote>
+<p>一般也可以在定义的时候赋予初值,其形式是 数据类型 标识符=值;</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int a=1,b,c;
+double c,d;
+</code></pre>
+<p>这就是变量的初始化，但是变量的初始化和赋值是不一样的。不赋值则是随机数</p>
+<blockquote>
+<p>变量定义的实质是向系统申请一块内存区域，系统找到一块合适的地方再进行简单的标记（比如登记给定的类型，放入指定的值）。（就像是自己提出要租什么类型的房子，房东找到合适的房子给你，然后身份证进行简单的登记，房子里至于是什么样房东不管，这也解释了为什么初始化一个变量以后里面的内容是随机的。 严格来说，其数值不算随机，因为可以跟踪上一次程序使用这一块内存的操作来推断，不过没人这么干）</p>
+</blockquote>
+<p>一般情况下，如果程序发现变量被赋予值的类型和它自身的不相同，会先尝试隐式转换（一般是占用空间小的类型往占用空间大的类型转换），就是能简单的去去小数，把存储的位数进行调整。若无法进行调整，需要强制进行类型转换，格式为（数据类型） 最小单位的表达式</p>
+<h2 id="变量的修饰关键词"><a href="#变量的修饰关键词" class="headerlink" title="变量的修饰关键词"></a>变量的修饰关键词</h2><p>const：用来声明变量位于只读内存区域，也就是说只可读取其存储的值但不能修改，常常用于声明常量，也用来写函数时将不需要修改值的变量设置成const防止显式的意外修改。</p>
+<p>auto：默认的关键词，用来声明局部变量，生命周期一般是在变量所在的范围最小的花括号内（可以把整个源代码文件的范围当做一个很大的无名花括号，定义在程序里的全局变量一般初值全为二进制的0），在生命周期外变量会被销毁（可省略）</p>
+<blockquote>
+<p>由于局部变量实在太常用，auto很少用来定义局部变量，所以在C11标准中auto变成了根据给定的初值自动设置变量的类型的关键词。</p>
+</blockquote>
+<p>register：声明变量在寄存器中存储，它是高速小容量靠近CPU的储存单元，并且数量有限，有些的还有特殊的用途，所以register只是一个建议，而且由于寄存器是一种单独离散的特殊单元，不能用&amp;取地址（寄存器没有地址）</p>
+<p>static：程序运行时声明变量的所在的内存一直会被保留到程序结束。被其修饰的变量所在的内存区域一般全是二进制的</p>
+<p>extern：表示此全局变量是从别的源代码文件定义的。</p>
+<h2 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h2><p>顾名思义就是不变的量，数学里的π永远等于3.1415926535…，e等于2.718281828459…，f（x）=x<sup>2</sup>+2x+1中的数2,1。类似的，代码里直接出现的数，和符号代替的数就是常量。在c语言中基本类型的数值都有表示方法</p>
+<p>在整型常量中，有二进制，十进制，八进制和十六进制表示方法，十进制就跟正常生活数的表示方法一样。八进制要在八进制表示的数前面加一个0，十六进制要在前面加0x或者0X，二进制要在数的前面加0b，默认情况下，十进制表示的数都会被认为是int类型，如果想表示无符号类型就要在数的后面加一个u，长整型要在数的后面加l或者L，长无符号整型在数的后面加lu，长长整型要加ll。浮点数一般是我们生活常用的表达。默认是double类型，要是表示float类型，需要在数的后面加一个f。还有一种则是科学计数法的表示方法。用 底数e整数表示，整数正负均可。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">-100
+0xfff
+0o456712
+0b10111
+54L
+30U
+65598LU
+5466778ll
+12.34
+3.14159f
+1.1e-3
+</code></pre>
+<p>字符型常量用一对单引号包含一个字符</p>
+<pre class=" language-lang-c"><code class="language-lang-c">'c' '1'
+</code></pre>
+<p>字符串（字符数组常量）是用一对双引号包含字符串。是特殊的字符数组常量的表示方法。我们规定，字符串的结束标志是‘\0’。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">"c++"
+"我太难了"
+</code></pre>
+<h2 id="基本运算符号"><a href="#基本运算符号" class="headerlink" title="基本运算符号"></a>基本运算符号</h2><p>赋值符号= :运算级别倒数第二的运算符号 它将右边的值赋值给左边，不难理解，赋值符号左边只能是可以写入的存储单元，所以这样的存储单元又叫左值（lvalue），赋值表达式返回的值是等号右边得到的值。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">a=1; //a的内容是1，同时这个表达式返回的值是1
+</code></pre>
+<p>逗号, :运算级别最低的符号，主要是以逗号为分界点，从左逐一执行运算操作得到数值，整个表达式最后的结果是最右边得到的值。</p>
+<p>加号+ 减号- 乘号* 除号/ 和数学意义上的运算是一样的，他们相对的运算顺序也和数学的四则运算是一样的。而求余符号%是计算整数之间整除以后的余数。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">1+2,3*4,5-6,13/2; //从左到右分别是3,12,-1,6，最后结果是6
+</code></pre>
+<p>位左移&lt;&lt;是把一个数当做二进制进行左移，左边移出的二进制位舍弃，右边移进来的二进制位用0填充。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">6<<2;//表示将6这个int类型左移两位，得到24.
+</code></pre>
+<p>位右移&gt;&gt;是把一个数当做二进制进行右移，右边移出的二进制位舍弃，左边移进来的二进制位用0填充。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">6>>2;//表示将6这个int类型右移两位，得到1.
+</code></pre>
+<p>位与&amp;:把两个数的二进制逐个进行与运算。<br>位或|:把两个数的二进制逐个进行或运算。<br>位取反~:把一个数的二进制进行取反运算<br>异或^:把2个数的二进制进行异或运算<br>取地址符号&amp;:得到一个变量在内存中的地址。（这里的地址是个相对概念，在系统里给程序的内存地址是个相对地址）<br><em>:寻址符号是根据内存地址来指向一个内存空间，eg </em>p=2;将2赋给p里的内存地址指向的内存单位。<br>成员运算符.是引出整体里的成员，比如k.name就是调出k里的小成员name<br>-&gt;:指向成员运算符，就是通过其将内存地址直接指向成员而不是整体</p>
+<pre class=" language-lang-c"><code class="language-lang-c">p->name;//p这个指针通过此运算符直接指向那个内存单位的成员name
+</code></pre>
+<p>自增++是指存储单位的值加一个单位的数值，而自减—是指存储单位的值减一个单位的数值。他们在前面表示先进行运算在取值，在后面表示先取值在进行运算（有自增自减运算是因为汇编有专门的指令inc，dec）</p>
+<p>复合赋值符号是先计算等号右边的值，在把左边的值和右边计算的结果进行运算赋值给左值。（有复合复制符号是因为汇编里像add eax，ebp都是把左边的值和右边的值进行运算并把结果存入左边的存储单元）</p>
+<pre class=" language-lang-c"><code class="language-lang-c">a += 2;//就是a和2相加，在把结果给a。
+</code></pre>
+<p>sizeof()是一个特殊的运算符，它是计算一个类型所占的字节数，用法是sizeof(变量或者数据类型)</p>
+<pre class=" language-lang-c"><code class="language-lang-c">sizeof(int);//编译器一般会返回4
+</code></pre>
+<p>括号()是将括号里的表达式强制提到最高运算的优先级，相当于数学运算里括号的作用</p>
+<h2 id="逻辑运算"><a href="#逻辑运算" class="headerlink" title="逻辑运算"></a>逻辑运算</h2><p>大于&gt;，小于&lt;，不大于&lt;=，不小于&gt;=，不等于!=，等于==表示的意义和数学一样，只不过它返回的是逻辑上的真或假</p>
+<p>逻辑与&amp;&amp;，逻辑或||，逻辑非!和数学里的用法是一样的</p>
+<blockquote>
+<p>当一个逻辑运算只计算了左边得到的逻辑结果就能判定整个逻辑运算的结果时，会跳过右边的逻辑运算。</p>
+</blockquote>
+<p>条件运算符?: :计算问号左边的逻辑真假，如果为真结果就是冒号左边的结果，为假是冒号右边的结果。</p>
+<h2 id="流程控制语句"><a href="#流程控制语句" class="headerlink" title="流程控制语句"></a>流程控制语句</h2><h3 id="如果语句"><a href="#如果语句" class="headerlink" title="如果语句"></a>如果语句</h3><pre class=" language-lang-c"><code class="language-lang-c">if(返回整数的表达式) 语句1 [else 语句2]
+</code></pre>
+<p>此语句先计算返回整数的表达式，如果是逻辑上的真，就执行语句1，如果是假就执行语句2，如果没有逻辑为假的操作，方括号里的语句可以不写。</p>
+<h3 id="先判断当循环语句"><a href="#先判断当循环语句" class="headerlink" title="先判断当循环语句"></a>先判断当循环语句</h3><pre class=" language-lang-c"><code class="language-lang-c">while(返回整数的表达式) 语句
+</code></pre>
+<p>此语句先判断返回整数的表达式，为真就执行循环语句，在进入下一次循环判断，为假就结束循环不执行语句</p>
+<h3 id="后判断循环语句"><a href="#后判断循环语句" class="headerlink" title="后判断循环语句"></a>后判断循环语句</h3><pre class=" language-lang-c"><code class="language-lang-c">do 循环语句 while(返回整数类型的表达式)
+</code></pre>
+<p>这个先执行循环语句，然后在判断返回整数的表达式，为真就继续进行循环，为假就结束循环。</p>
+<h3 id="计次循环语句"><a href="#计次循环语句" class="headerlink" title="计次循环语句"></a>计次循环语句</h3><pre class=" language-lang-c"><code class="language-lang-c">    for(语句a;返回整数的表达式b;语句c) 循环语句d
+</code></pre>
+<p>首先执行语句a，然后计算返回整数的表达式b，如果为逻辑上的真就执行循环语句d，最后在执行语句c进入下一个循环判断;如果为假就结束循环</p>
+<blockquote>
+<p>循环语句里可以使用break来跳出循环体，也可以使用continue来直接进入下一次的循环。流程控制语句可以使用花括号的复合语句</p>
+</blockquote>
+<p>栗子：</p>
+<pre class=" language-lang-c"><code class="language-lang-c">if(a==0) a=1; else a=2;
+if(a==3) &#123;
+    a=3;
+    printf("a is 3");
+&#125;
+else &#123;
+    a=4;
+    printf("a is not 3");
+&#125;
+</code></pre>
+<h3 id="选择语句格式"><a href="#选择语句格式" class="headerlink" title="选择语句格式"></a>选择语句格式</h3><pre class=" language-lang-c"><code class="language-lang-c">switch(返回整数的表达式)&#123;
+case 整数常量a:语句a1;
+语句a2;
+...
+语句an;
+case 整数常量b:语句b1;
+语句b2;
+...
+语句bn;
+...
+case 整数常量n:语句n1;
+...
+语句nn;
+[default:]语句1;
+语句2;
+...
+语句n;
+&#125;
+</code></pre>
+<p>此语句是先计算返回整数的表达式，然后进入花括号按从上到下的顺序与case后的整数常量进行判断，遇到相等的整数常量就在此标签开始执行后面的语句一直执行到底，如果遇到了半天都没有遇到，程序会从default:标签开始执行语句，当然，也可以中间使用break语句跳出这个花括号的复合语句。</p>
+<pre class=" language-lang-c"><code class="language-lang-c">switch (a)&#123;
+        default:printf("error\n");
+        case 1:printf("Monday\n");
+        case 2:printf("Tuesday\n");
+        case 3:printf("Wednesday\n");
+        case 4:printf("Thursday\n");
+        case 5:printf("Friday\n");
+        break;
+        case 6:printf("Saturday\n");
+        case 7:printf("Sunday\n");
+    &#125;
+</code></pre>
+<p>如果a等于8，程序会从default:标签开始执行，输出结果为</p>
+<pre><code>error
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+</code></pre><h2 id="函数（构成C语言程序最小的单元）"><a href="#函数（构成C语言程序最小的单元）" class="headerlink" title="函数（构成C语言程序最小的单元）"></a>函数（构成C语言程序最小的单元）</h2><p>编程的函数和数学里的函数类似，只不过数学里的函数仅仅只是输入数（可以是一个数或者几个数）通过一定的方法得到另一个数。而编程里的函数不止可以做数学计算，还可以干其他的事，可以没有输入，也可以有好几个（就行你给一个人发出命令，可以让他去写一篇文章，可以规定一些要求，也可以什么也不要求，最后得到的东西就是写好的文章）</p>
+<h3 id="函数的声明"><a href="#函数的声明" class="headerlink" title="函数的声明"></a>函数的声明</h3><pre class=" language-lang-c"><code class="language-lang-c">数据类型 函数标识符([数据类型 参数标识符1，数据类型 参数标识符2...,数据类型 参数标识符n]);
+</code></pre>
+<p>其中声明的参数标识符可以省略</p>
+<h3 id="函数的定义"><a href="#函数的定义" class="headerlink" title="函数的定义"></a>函数的定义</h3><pre class=" language-lang-c"><code class="language-lang-c">数据类型 函数标识符([数据类型 参数标识符1，数据类型 参数标识符2...,数据类型 参数标识符n])&#123;
+语句1...
+语句n
+&#125;
+</code></pre>
+<p>其中函数不能嵌套定义，也就是说不能在一个函数的语句里不能在定义一个函数。实际上，那些参数也是函数里的局部变量，只是摆在了括号里等待数据的传入。而且在c语言里，在调用函数时，传入参数的个数和类型都要正确。</p>
+<h3 id="函数的调用形式"><a href="#函数的调用形式" class="headerlink" title="函数的调用形式"></a>函数的调用形式</h3><p>定义的函数标识符（传入的参数1,……，传入的参数n）但调用的前提是前面必须有函数的定义或者声明，否则会出现错误<br>以上的一些规定其实可以和数学的函数类比，数学的函数哪里学过嵌套定义另外的函数，但是我们可以在前面设一个函数，然后在另外一个函数调用前面设好的函数，而且数学里前面没有设好的函数，后面的函数不能无中生有调用前面没有的函数（就像你之前如果不知道写文章是什么意思，老板命令你写文章，你不知道怎么回事。）</p>
+<p>在c语言中，整个程序的入口函数名为main，入口函数的定义为:</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int main()&#123;&#125;和int main(int argc，char**argv)&#123;&#125;
+</code></pre>
+<h2 id="其他的类型"><a href="#其他的类型" class="headerlink" title="其他的类型"></a>其他的类型</h2><h3 id="数组类型array"><a href="#数组类型array" class="headerlink" title="数组类型array"></a>数组类型array</h3><p>数组类型是为了方便解决一些问题，在内存的排列是连续的。表示方法如下:</p>
+<pre class=" language-lang-c"><code class="language-lang-c">数据类型 []
+</code></pre>
+<p>数组变量初始化一般有如下几个方法</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int a[3]=&#123;1,2,3&#125;
+int a[]=&#123;1,2,3,4,5&#125;
+int a[10]=&#123;1,2,3,4,5,6&#125;
+</code></pre>
+<p>但是数组在定义后不能直接整体赋值，也就是说，像a=的赋值将会导致错误，这是因为数组名表示的是指针常量，而不是变量，只能间接通过内存复制来间接赋值。</p>
+<p>数组变量引用的下标一定是有符号的整数类型（无符号的将会导致程序崩溃）</p>
+<h3 id="指针pointer"><a href="#指针pointer" class="headerlink" title="指针pointer"></a>指针pointer</h3><p>指针是存储内存地址的存储单元，它的作用是方便对某一块内存进行操作（比如对另一块传入的变量进行操作，对申请到的无名内存进行操作等）其基本形式是 数据类型 ＊，而在利用指针的时候，指针的使用方法是 ＊变量标识符，整体就变成了指向目标类型的内存区域了。但是，指针在进行增减运算时，是以数据类型存储大小为单位的</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int a,p=&a;
+p++;
+</code></pre>
+<p>这时候p指针自增了sizeof(int)单位的数值。</p>
+<p>还有一种叫做函数指针的东西，就是指向一个特定格式函数的指针。长得像如下形式</p>
+<pre class=" language-lang-c"><code class="language-lang-c">返回形式 (*指针名)(参数列表)
+</code></pre>
+<p>函数指针可以直接当成函数来调用指针指向的函数。</p>
+<p>举个🌰</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int foo(int a,int b)&#123;
+    return a-b;
+&#125;
+
+int main()&#123;
+    int (*compare)(int a,int b) = foo;
+    compare = &foo;
+    (*compare)(1,2);
+    compare(1,2);
+&#125;
+</code></pre>
+<h3 id="结构体struct"><a href="#结构体struct" class="headerlink" title="结构体struct"></a>结构体struct</h3><p>结构体是指为了方便管理数据专门自己设置的数据类型，不管有名还是无名它都会开辟内存空间，定义方式：</p>
+<pre class=" language-lang-c"><code class="language-lang-c">struct 标识符 &#123;
+数据类型1 成员标识符1
+...
+数据类型n 成员标识符n
+&#125;;
+</code></pre>
+<p>这里自定义结构体名可以省略，但是这里的分号不可以省略，因为定义的整体就是一个数据类型</p>
+<pre class=" language-lang-c"><code class="language-lang-c">struct student &#123;
+    unsigned number;
+    unsigned age;
+    unsigned score;
+&#125; function()&#123;&#125;
+</code></pre>
+<p>这里的函数的返回类型为结构体student</p>
+<p>使用定义的结构体类型的方法是struct 已定义的结构体名</p>
+<h3 id="枚举enum"><a href="#枚举enum" class="headerlink" title="枚举enum"></a>枚举enum</h3><p>在c语言是一种构造类型，用于声明一组命名的常数。其基本定义格式是 </p>
+<pre class=" language-lang-c"><code class="language-lang-c">enum 标识符&#123;成员标识符1[=整数值],...,成员标识符n[=整数]&#125;
+</code></pre>
+<p>如果成员1没有给出整数，默认为0，之后的元素以1递增，成员名不能重名。</p>
+<p>使用定义的枚举类型为</p>
+<pre class=" language-lang-c"><code class="language-lang-c">enum 定义的标识符
+</code></pre>
+<h3 id="共同体（联合，union）"><a href="#共同体（联合，union）" class="headerlink" title="共同体（联合，union）"></a>共同体（联合，union）</h3><p>一种构造类型，几个成员共用一个内存空间，最后的大小取决于占用内存最大的成员，其基本定义形式是</p>
+<pre class=" language-lang-c"><code class="language-lang-c">union 标识符&#123;
+数据类型 成员标识符1
+数据类型 成员标识符2
+.....
+数据类型 成员标识符n
+&#125;;
+</code></pre>
+<p>使用已定义的共同体类型为 </p>
+<pre class=" language-lang-c"><code class="language-lang-c">union 已定义的标识符
+</code></pre>
+<h2 id="预处理指令"><a href="#预处理指令" class="headerlink" title="预处理指令"></a>预处理指令</h2><p>所有的预处理指令都是在程序编译以前就执行的指令,且前面都是##开头。</p>
+<h1 id="include指令是包含指令，在编译以前将给定的文件包含进去，有两种形式-include-lt-文件名-gt-和-include-“文件名”，其中前一个是让预处理程序到预定义的缺省路径下寻找文件，后一种是让其先在源代码文件的当前目录下寻找文件，然后在默认路径下找。"><a href="#include指令是包含指令，在编译以前将给定的文件包含进去，有两种形式-include-lt-文件名-gt-和-include-“文件名”，其中前一个是让预处理程序到预定义的缺省路径下寻找文件，后一种是让其先在源代码文件的当前目录下寻找文件，然后在默认路径下找。" class="headerlink" title="include指令是包含指令，在编译以前将给定的文件包含进去，有两种形式#include &lt;文件名&gt;和#include “文件名”，其中前一个是让预处理程序到预定义的缺省路径下寻找文件，后一种是让其先在源代码文件的当前目录下寻找文件，然后在默认路径下找。"></a>include指令是包含指令，在编译以前将给定的文件包含进去，有两种形式#include &lt;文件名&gt;和#include “文件名”，其中前一个是让预处理程序到预定义的缺省路径下寻找文件，后一种是让其先在源代码文件的当前目录下寻找文件，然后在默认路径下找。</h1><h1 id="define-目标1-结果1，是讲非双引号之外的内容进行简单的文本替换（结果1可以有多个空格），常见的形式为"><a href="#define-目标1-结果1，是讲非双引号之外的内容进行简单的文本替换（结果1可以有多个空格），常见的形式为" class="headerlink" title="define 目标1 结果1，是讲非双引号之外的内容进行简单的文本替换（结果1可以有多个空格），常见的形式为"></a>define 目标1 结果1，是讲非双引号之外的内容进行简单的文本替换（结果1可以有多个空格），常见的形式为</h1><pre class=" language-lang-c"><code class="language-lang-c">#define text “Hello world”
+</code></pre>
+<p>如果定义了函数的替换，函数的参数会在代码里简单的替换成目标指令</p>
+<p>目标中的 #表示将参数变成字符串，##是用于连接两个字符串的</p>
+<pre class=" language-lang-c"><code class="language-lang-c">#define M(x,y) x*y
+
+M(3+5,2+7);//相当于3+5*2+7,结果为20
+
+#define paster( n ) printf( "token " #n" = %d\n ", token##n )
+paster(9);
+</code></pre>
+<p>相当于</p>
+<pre class=" language-lang-c"><code class="language-lang-c">printf("token 9 = %d\n",token9);
+</code></pre>
+<p>当然，如果替换的内容很长，又不想写在一行上，就可以在一行的末尾用\结尾，然后另起一行继续写</p>
+<pre class=" language-lang-c"><code class="language-lang-c">#define menutext "1.scanf()\n\
+2.printf()\n\
+3.exit\n"
+</code></pre>
+<p>如果想取消前面的宏定义可以使用##undef 目标1</p>
+<h1 id="if预处理是一个和类似于if语句的预处理指令，如果为真就执行-if和-else或者-elif之间的语句，否则就会执行后面的-else或者进行-elif的判断（else-if的省略）"><a href="#if预处理是一个和类似于if语句的预处理指令，如果为真就执行-if和-else或者-elif之间的语句，否则就会执行后面的-else或者进行-elif的判断（else-if的省略）" class="headerlink" title="if预处理是一个和类似于if语句的预处理指令，如果为真就执行#if和#else或者#elif之间的语句，否则就会执行后面的#else或者进行#elif的判断（else if的省略）"></a>if预处理是一个和类似于if语句的预处理指令，如果为真就执行#if和#else或者#elif之间的语句，否则就会执行后面的#else或者进行#elif的判断（else if的省略）</h1><h1 id="ifdef和-ifndef比较特殊，它是判断前面有没有-define定义的标识符执行方式类似于-if"><a href="#ifdef和-ifndef比较特殊，它是判断前面有没有-define定义的标识符执行方式类似于-if" class="headerlink" title="ifdef和#ifndef比较特殊，它是判断前面有没有#define定义的标识符执行方式类似于#if"></a>ifdef和#ifndef比较特殊，它是判断前面有没有#define定义的标识符执行方式类似于#if</h1><h1 id="endif是结束前面预处理指令的判断"><a href="#endif是结束前面预处理指令的判断" class="headerlink" title="endif是结束前面预处理指令的判断"></a>endif是结束前面预处理指令的判断</h1><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>typedef关键词是为一个数据类型其另外一个名字，并不是生成了一个新的类型，形式是typedef 数据类型 别名比如</p>
+<pre class=" language-lang-c"><code class="language-lang-c">typedef struct &#123;int a;&#125;ok;
+
+typedef unsigned long DWORD;
+</code></pre>
+<h2 id="goto语句"><a href="#goto语句" class="headerlink" title="goto语句"></a>goto语句</h2><p>goto语句实际上是汇编语言的jmp语句，实现无条件跳转指定标签的功能，用法如下goto 标签标识符</p>
+<pre class=" language-lang-c"><code class="language-lang-c">loop: if(getchar()!='\n')&#123;
+n++;
+goto loop;
+&#125;
+</code></pre>
+<p>等价于下面的x86汇编指令</p>
+<pre class=" language-lang-x86asm"><code class="language-lang-x86asm">loop: CALL getchar
+CMP AX,'\n'
+JZ out
+INC n
+JMP loop
+out:
+...
+</code></pre>
+<p>由于后来结构化编程的思想出现，goto语句用的很少了</p>
+<h2 id="个人其他的一点见解"><a href="#个人其他的一点见解" class="headerlink" title="个人其他的一点见解"></a>个人其他的一点见解</h2><p>其实数组的定义应该是类似于Java标准的定义</p>
+<pre class=" language-lang-c"><code class="language-lang-c">int [2] a=&#123;1,2&#125;;//实际这样写C语言会报错
+</code></pre>
+<p>而且严格意义上来说，a指向的类型是int [2]类型，&amp;a[0]指向的类型是int类型，除非是作为sizeof或者单目&amp;操作符的操作数，C语言都将数组名弱化为基本的类型只是方便我们的处理。</p>
+
+            </div>
+            <hr/>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone" data-wechat-qrcode-helper="<p>微信里点“发现”->“扫一扫”二维码便可查看分享。</p>"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        <p class="reprint-tip">
+            <i class="fa fa-exclamation-triangle"></i>&nbsp;&nbsp;
+            <span>转载规则</span>
+        </p>
+        
+            <div class="center-align">
+                <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by/4.0/deed.zh">
+                    <img alt=""
+                         style="border-width:0"
+                         src="https://i.creativecommons.org/l/by/4.0/88x31.png"/>
+                </a>
+            </div>
+            <br/>
+            <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text"
+                  property="dct:title" rel="dct:type">
+                    《C语言快速入门(新)》
+                </span> 由
+            <a xmlns:cc="http://creativecommons.org/ns#" href="/2019/09/15/C%E8%AF%AD%E8%A8%80%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" property="cc:attributionName"
+               rel="cc:attributionURL">
+                赵远航
+            </a> 采用
+            <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by/4.0/deed.zh">
+                知识共享署名 4.0 国际许可协议
+            </a>进行许可。
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fa fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2019/09/16/%E6%97%A5%E8%AF%AD%E5%8D%95%E8%AF%8D%E9%9B%86%E9%94%A6-1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="日语单词集锦(1)">
+                        
+                        <span class="card-title">日语单词集锦(1)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+
+
+
+单词
+假名
+意思
+
+
+
+
+凪ぐ
+なぐ
+【自】风平浪静
+
+
+殴る
+なぐる（凪ぐる）
+【他1】殴打
+
+
+慰める
+なぐさめる（凪ぐ冷める）
+【他】安慰
+
+
+
+
+
+
+
+
+单词
+假名
+意思
+
+
+
+
+吹く
+ふく
+【自他】吹
+
+
+服
+ふく
+衣服
+
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-09-16
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-user fa-fw"></i>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%97%A5%E8%AF%AD/" target="_blank">
+                        <span class="chip bg-color">日语</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                本篇&nbsp;<i class="fa fa-dot-circle-o"></i>
+            </div>
+            <div class="card">
+                <a href="/2019/09/15/C%E8%AF%AD%E8%A8%80%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="C语言快速入门(新)">
+                        
+                        <span class="card-title">C语言快速入门(新)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+本文仅涉及C语言的语法，而不介绍具体的函数功能，函数功能可以看API手册上面的函数介绍。本文偏向于总结形式，所写的内容遵循的标准是C89/C99标准。此文在原来的基础上进行了修改。
+
+C语言是建立在汇编语言之上的中级语言，常常用于编写底层
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-09-15
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-user fa-fw"></i>
+                            赵远航
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/C%E8%AF%AD%E8%A8%80/" target="_blank">
+                        <span class="chip bg-color">C语言</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%85%A5%E9%97%A8/" target="_blank">
+                        <span class="chip bg-color">入门</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="fa fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fa fa-list"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            // headingsOffset: -205,
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).slideUp(500);
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).slideDown(500);
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+    
+
+</main>
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            本站由&nbsp;&copy;<a href="http://yoursite.com" target="_blank"></a>&nbsp;基于
+            <a href="https://hexo.io/" target="_blank">Hexo</a>&nbsp;的
+            <a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>&nbsp;主题搭建
+            <br>
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="fa fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fa fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            <br>
+            <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+            <script>
+                var now = new Date();
+
+                function createtime() {
+                    var grt = new Date("06/28/2019 00:00:00");
+                    now.setTime(now.getTime() + 250);
+                    days = (now - grt) / 1000 / 60 / 60 / 24;
+                    dnum = Math.floor(days);
+                    hours = (now - grt) / 1000 / 60 / 60 - (24 * dnum);
+                    hnum = Math.floor(hours);
+                    if (String(hnum).length == 1) {
+                        hnum = "0" + hnum;
+                    }
+                    minutes = (now - grt) / 1000 / 60 - (24 * 60 * dnum) - (60 * hnum);
+                    mnum = Math.floor(minutes);
+                    if (String(mnum).length == 1) {
+                        mnum = "0" + mnum;
+                    }
+                    seconds = (now - grt) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+                    snum = Math.round(seconds);
+                    if (String(snum).length == 1) {
+                        snum = "0" + snum;
+                    }
+                    document.getElementById("timeDate").innerHTML = "本站已安全运行 " + dnum + " 天 ";
+                    document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+                }
+                setInterval("createtime()", 250);
+            </script>
+            
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fa fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    
+    <script src="/libs/others/clicklove.js"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+        <script>
+        (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/6984b559.js","daovoice")
+        daovoice('init', {
+            app_id: ""
+        });
+        daovoice('update');
+        </script>
+    
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.bootcss.com/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

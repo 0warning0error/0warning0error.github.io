@@ -1,0 +1,1142 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="初等概率论和统计学, 编程之眼">
+    <meta name="description" content="初等概率论基本概念
+随机试验 特点：
+在相同的条件下试验可大量地重复 
+进行一次试验不确定哪个结果会出现
+试验结果不止一个，而且能明确试验的所有可能结果
+
+
+样本空间： 随机试验E的所有可能结果的集合
+样本点：样本空间的元素
+随机事件：样本">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>初等概率论和统计学 | 编程之眼</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    <style type="text/css">
+        
+    </style>
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+    
+<meta name="generator" content="Hexo 5.3.0"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+
+<body>
+
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">编程之眼</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/tags" class="waves-effect waves-light">
+            
+            <i class="fa fa-tags"></i>
+            
+            <span>标签</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/categories" class="waves-effect waves-light">
+            
+            <i class="fa fa-bookmark"></i>
+            
+            <span>分类</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/friends" class="waves-effect waves-light">
+            
+            <i class="fa fa-address-book"></i>
+            
+            <span>友情链接</span>
+        </a>
+    </li>
+    
+    <li>
+        <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+            <i id="searchIcon" class="fa fa-search" title="搜索"></i>
+        </a>
+    </li>
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">编程之眼</div>
+        <div class="logo-desc">
+            
+            用计算机改变世界，用代码改善生活
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/tags" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-tags"></i>
+                
+                标签
+            </a>
+        </li>
+        
+        <li>
+            <a href="/categories" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-bookmark"></i>
+                
+                分类
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于
+            </a>
+        </li>
+        
+        <li>
+            <a href="/friends" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-address-book"></i>
+                
+                友情链接
+            </a>
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fa fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/7.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        初等概率论和统计学
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E5%88%9D%E7%AD%89%E6%A6%82%E7%8E%87%E8%AE%BA/" target="_blank">
+                                <span class="chip bg-color">初等概率论</span>
+                            </a>
+                        
+                            <a href="/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6/" target="_blank">
+                                <span class="chip bg-color">统计学</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                <div class="post-date info-break-policy">
+                    <i class="fa fa-calendar-minus-o fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2019-11-19
+                </div>
+
+                
+				
+				
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="fa fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="初等概率论基本概念"><a href="#初等概率论基本概念" class="headerlink" title="初等概率论基本概念"></a>初等概率论基本概念</h2><ul>
+<li>随机试验 特点：<ol>
+<li>在相同的条件下试验可大量地重复 </li>
+<li>进行一次试验不确定哪个结果会出现</li>
+<li>试验结果不止一个，而且能明确试验的所有可能结果</li>
+</ol>
+</li>
+<li>样本空间： 随机试验E的所有可能结果的集合</li>
+<li>样本点：样本空间的元素</li>
+<li>随机事件：样本空间S的子集（由一个样本点组成的集合叫基本事件）</li>
+<li>必然事件：样本空间S</li>
+<li>不可能事件：Ø</li>
+</ul>
+<h3 id="事件的关系和运算"><a href="#事件的关系和运算" class="headerlink" title="事件的关系和运算"></a>事件的关系和运算</h3><ol>
+<li>事件B包含事件A：若A发生则B一定发生（若相互包含则A=B，两事件相等）</li>
+<li>和事件:事件$A∪B=\{x|x∈A或x∈B\}$</li>
+<li>积事件:事件$A∩B=\{x|x∈A且x∈B\}$</li>
+<li>差事件:事件$A-B=\{x|x∈A且x∉B\}$</li>
+<li>互斥事件:$A∩B=Ø$</li>
+<li>对立事件:$A∩B=Ø且A∩B=S$</li>
+</ol>
+<h3 id="频率和概率"><a href="#频率和概率" class="headerlink" title="频率和概率"></a>频率和概率</h3><ul>
+<li>频数$n_A$：事件A已经发生的次数</li>
+<li>频率$f_n(A)$：进行了n次实验，事件A的频数$n_A$与n的比值</li>
+</ul>
+<p>频率性质：</p>
+<ol>
+<li>$0 \le f_n(A) \le 1$</li>
+<li>$f_n(S) = 1$</li>
+<li>$A_i(i=1,2,3,…k)$两两互斥，则$f_n(A_1∪A_2…∪A_k) =  f_n(A_1)+f_n(A_2)…+f_n(A_k)$</li>
+</ol>
+<p>事实表明，试验次数n逐渐增大，频率f_n(A)也逐步稳定在某个常数，这种稳定性就是通常所说的统计规律性，但实际不可能多次试验求得频率。为了理论研究方便，概率就这样产生了</p>
+<p>概率：对于随机试验E的每一个事件A赋予一个实数记为P(A),称为事件A的概率。且要满足以下条件：</p>
+<ol>
+<li>对于一个事件A,$P(A) \ge 0$</li>
+<li>必然事件S，$P(S) = 1$</li>
+<li>$A_i(i=1,2,3,…)$两两互斥,$P(A_1∪A_2…) =  P(A_1)+P(A_2)…$</li>
+</ol>
+<p>概率性质:</p>
+<ol>
+<li>$P(Ø) = 1$ （证明：构造n个空集的加事件求概率）</li>
+<li>$A_i(i=1,2,3,…k)$两两互斥,$P(A_1∪A_2…∪A_k) =  P(A_1)+P(A_2)…+P(A_k)$ （可列可加推导而来）</li>
+<li>B包含A 有$P(B-A) = P(B) - P(A)$ $P(B) \ge P(A)$</li>
+<li>$P(A) \le 1$ (S包含A)</li>
+<li>$P(\overline{A}) = 1 - P(A)$</li>
+<li>$P(A∪B) = P(A) + P(B) - P(AB)$(利用差事件)</li>
+</ol>
+<h3 id="古典概型"><a href="#古典概型" class="headerlink" title="古典概型"></a>古典概型</h3><p>前提条件</p>
+<ol>
+<li>样本空间是有限集</li>
+<li>每个基本事件发生的概率等可能</li>
+</ol>
+<p>$P(A) = \frac{A包含的基本事件数}{S中基本事件数}$</p>
+<h3 id="几何概型"><a href="#几何概型" class="headerlink" title="几何概型"></a>几何概型</h3><p>前提条件</p>
+<ol>
+<li>样本空间是无限集</li>
+<li>每个基本事件发生的概率等可能</li>
+</ol>
+<p>$P(A) = \frac{A在某个标准下的测度}{S在某个标准下的测度}$</p>
+<h3 id="条件概率"><a href="#条件概率" class="headerlink" title="条件概率"></a>条件概率</h3><p>A,B是2个事件，且$P(A) &gt; 0$,称<br>$P(B|A) = \frac{P(AB)}{P(B)}$（直观理解：事件A里发生事件B的概率）<br>同样，条件概率也是概率，满足概率的基本特点。</p>
+<p>条件概率的定义可以得到以下定理：<br>$P(AB) = P(B|A)P(A)$<br>拓展到3个事件也有<br>$P(ABC) = P(C|BA)P(B|A)P(A)$<br>同样可以推导n个事件</p>
+<p>这样我们可以通过这个定理推出贝叶斯公式：<br>$P(B|A) = \frac{P(A|B)P(B)}{P(A)}$</p>
+<h3 id="独立性"><a href="#独立性" class="headerlink" title="独立性"></a>独立性</h3><p>独立性的直观感觉是，一个事件不会影响到其他事件的发生与否。反应到概率里就是2个独立事件同时发生的概率是2个事件的概率直接相乘。<br>如果A,B2个事件满足$P(AB) = P(A)P(B)$,则A、B相互独立。<br>推广到n个事件，一个事件A不会影响到其他任何事件（包括集事件）的发生与否，这才是独立。</p>
+<h2 id="随机变量及其分布"><a href="#随机变量及其分布" class="headerlink" title="随机变量及其分布"></a>随机变量及其分布</h2><h2 id="统计学科"><a href="#统计学科" class="headerlink" title="统计学科"></a>统计学科</h2><h3 id="统计学派"><a href="#统计学派" class="headerlink" title="统计学派"></a>统计学派</h3><ol>
+<li>国势学派：通过对比分析分析国家的组织、领土、人口等资源。</li>
+<li>概率论学派：开始使用可度量的方法，力求使用数字解释现实</li>
+<li>数理统计学派：将概率论引入统计学</li>
+<li>社会统计学派：对社会做大量的调查</li>
+</ol>
+<blockquote>
+<p>我们所学的是数理统计，可以将样本中的个体视为单独的随机变量，统计学的很多东西也是由这个思想而来。概率论和数理统计只有一个概率论的核心。</p>
+<h3 id="统计学分类"><a href="#统计学分类" class="headerlink" title="统计学分类"></a>统计学分类</h3></blockquote>
+<ul>
+<li>描述统计：使用图表、概括性数字等对数据进行描述</li>
+<li>推断统计：通过给定数据推断总体特征</li>
+</ul>
+<h3 id="统计学常用概念（意会即可）"><a href="#统计学常用概念（意会即可）" class="headerlink" title="统计学常用概念（意会即可）"></a>统计学常用概念（意会即可）</h3><ol>
+<li>总体：要研究的所有基本单位的总和（和样本一样大量 同质 差异）</li>
+<li>个体：总体的构成单位</li>
+<li>样本：从总体抽取的部分个体组成的集合（样本容量&gt;=30称为大容量，否则为小容量）</li>
+<li><p>定性数据：不用或者不能用具体数值描述的数据</p>
+<ul>
+<li>定类数据：表示数据特定特征或类型的数据，比如：人的性别</li>
+<li>定序数据：表示的特征或类型能比较的数据，比如：淘宝的商品星级</li>
+</ul>
+</li>
+<li><p>定量数据：能用具体数值量化的数据</p>
+<ul>
+<li>定距数据：有间隔特征的数据，有单位但没有绝对零点的数据，比如：温度</li>
+<li>定比数据：有测量单位，也有绝对零点的数据，比如：身高、体重。</li>
+</ul>
+</li>
+<li><p>抽样误差：样本的抽取得到的结果和总体特征的差距（不可避免）</p>
+</li>
+<li><p>非抽样误差:由于调查过程中的失误造成的误差</p>
+</li>
+</ol>
+<h2 id="统计数据的描述"><a href="#统计数据的描述" class="headerlink" title="统计数据的描述"></a>统计数据的描述</h2><h3 id="统计数据分组"><a href="#统计数据分组" class="headerlink" title="统计数据分组"></a>统计数据分组</h3><p>原则：</p>
+<ol>
+<li>组内同质性</li>
+<li>组间差质性</li>
+</ol>
+<p>过程：</p>
+<ol>
+<li>选择分组标志。品质标志（性别、学历）或者数量标志（身高、体重）</li>
+<li>分组方法：<ul>
+<li>单变量值分组（离散数据，变量少）</li>
+<li>组距分组（数值型数据，变量多）（一般上组限不算在组里）</li>
+</ul>
+</li>
+</ol>
+<h3 id="分布集中程度指标"><a href="#分布集中程度指标" class="headerlink" title="分布集中程度指标"></a>分布集中程度指标</h3><ul>
+<li>众数：一组数据中出现次数最多的数据（可以没有，也可以不只一个）</li>
+<li>中位数：数据排序后，位置在最中间的数</li>
+<li>分位数：</li>
+<li>均值：就是算术平均数，</li>
+<li>几何平均数：n个数连乘的n次方根</li>
+<li>切尾均值：同时去掉两端若干数后的均值</li>
+</ul>
+<h3 id="分布离散程度指标"><a href="#分布离散程度指标" class="headerlink" title="分布离散程度指标"></a>分布离散程度指标</h3><ul>
+<li>极差：最大值与最小值之差</li>
+<li>内距：上四分位数与下四分位数之差</li>
+<li>方差：离差平方的平均数</li>
+<li>标准差：方差的平方根</li>
+<li>离散系数(变异系数)：标准差与均值之比</li>
+</ul>
+<h3 id="分布形态指标"><a href="#分布形态指标" class="headerlink" title="分布形态指标"></a>分布形态指标</h3><ul>
+<li>偏态</li>
+<li>峰度</li>
+</ul>
+<h3 id="频率分布直方图"><a href="#频率分布直方图" class="headerlink" title="频率分布直方图"></a>频率分布直方图</h3><ul>
+<li>平均数：（组内平均数）* 次数/总次数</li>
+<li>中位数：使整体面积能分成一半的点</li>
+<li>众数：</li>
+</ul>
+<h2 id="参数估计"><a href="#参数估计" class="headerlink" title="参数估计"></a>参数估计</h2><p>参数估计是指通过抽取的样本来预估总体的某些指标，有2种方法</p>
+<ol>
+<li>点估计</li>
+<li>区间估计</li>
+</ol>
+<h3 id="评价估计量的标准"><a href="#评价估计量的标准" class="headerlink" title="评价估计量的标准"></a>评价估计量的标准</h3><ol>
+<li><p>无偏性:<br>如果一个估计量的数学期望是总体的参数，那么这个估计量无偏</p>
+</li>
+<li><p>有效性:<br>一个估计量同时也要准确，如果一个估计量的方差比另外一个的小，这前者估计量比后者有效</p>
+</li>
+<li><p>一致性（相合性）:<br>随着样本数的增加，估计量的值也应该越来越接近总体的参数(样本越多，估计越准确)</p>
+</li>
+</ol>
+<h3 id="点估计"><a href="#点估计" class="headerlink" title="点估计"></a>点估计</h3><p>如果我们已经知道了总体的分布但不知道分布的参数，我们可以借助于样本来估计总体未知的参数。</p>
+<ol>
+<li><p>矩估计法</p>
+<p>矩估计是一般人通常使用的估计方法，利用样本数据直接对总体的某些数字特征进行估计。<br>假设总体X服从某个分布，其$E(X)=μ$，$D(X)=σ^2$,有一些样本$X_1,X_2…X_n$独立，和X服从同一个分布。<br>有$E(\bar{X}) = \frac{E(X_1)+…+E(X_n)}{n} = μ$<br>$D(S^2) = σ^2$<br>$E(X^2) = μ+σ^2$</p>
+</li>
+<li><p>最大似然估计</p>
+<p>要想求某个参数，还有一种思路就是通过概率，一般我们会构造一个概率$P(θ|X_1,X_2…X_n)$(这是个trick)，这个概率的直观意义就是在取到$X_1,…X_n$的情况下，取到θ值的概率。通过直观的理解，取到θ的概率越大越好，因为取到了θ，后面取到原本值才会更接近$X_1,…X_n$。所以<br>$P(θ|X_1,X_2…X_n)=\frac{P(θ,X_1,X_2…X_n)}{P(X_1,X_2…X_n)}=\frac{P(X_1,X_2…X_n|θ)P(θ)}{P(X_1,X_2…X_n)}$(分母各个样本值已经确定，是个常数，在这个问题下不用管)。然后我们默认，θ的各个取值都是平等的，也就是说θ的取值服从均匀分布，所以θ不管为多少，P(θ)都可以视为常数。最终，我们只需要关注$P(X_1,X_2…X_n|θ)$即可。而由于$X_1,X_2…X_n$独立，故$P(X_1,X_2…X_n|θ)=P(X_1|θ)P(X_2|θ)…P(X_n|θ)$。而当X为连续概率时，我们可以近似$P(X_1,X_2…X_n|θ)=f(X_1|θ)Δxf(X_2|θ)Δx…f(X_n|θ)Δx$。而Δx为常数，故最后的$L(θ) = f(X_1|θ)f(X_2|θ)…f(X_n|θ)$。当L(θ)取最大值的时候，此时的θ就是我们求的。当然当L(θ)不存在最大值的时候，我们只能通过别的方法求了。</p>
+</li>
+<li><p>最大后验估计</p>
+<p>和前面的最大似然估计类似，但此处的θ不服从均匀分布。有可能是其他分布。</p>
+</li>
+</ol>
+<h3 id="区间估计"><a href="#区间估计" class="headerlink" title="区间估计"></a>区间估计</h3><p>有了点估计的估计量远远不够，因为从样本得到的估计量并不是总体参数，估计值一定也会与现实有一定的距离，所以，我们还希望能预估总体参数最有可能落在的区间，并给出总体参数落在这个区间的可能性。这种形式的估计就叫区间估计。<br>假如给定一个α在(0,1)，从总体其中抽取多个样本$X_1,X_2,….,X_n$。确定两个统计量a,b。对参数θ</p>
+<p>$P\{a&lt;θ&lt;b\} \ge 1-α$</p>
+<p>则称随机区间(a,b)是θ的置信水平为1-α的置信区间。1-α的置信区间。</p>
+<h4 id="置信区间的求法"><a href="#置信区间的求法" class="headerlink" title="置信区间的求法"></a>置信区间的求法</h4><ol>
+<li>构造枢轴量$W=W(X_1,X_2,…X_n,θ)$，使W的分布不依赖θ和其他未知参数</li>
+<li>对给定的置信水平1-α，确定2个常数使$P\{a&lt;W&lt;b\} \ge 1-α$，如果能得出等价的$P\{a’&lt;θ&lt;b’\} \ge 1-α$,则(a’,b’)是置信水平为1-α的置信区间。</li>
+</ol>
+<h4 id="总体平均值的区间估计"><a href="#总体平均值的区间估计" class="headerlink" title="总体平均值的区间估计"></a>总体平均值的区间估计</h4><p>大样本下，样本均值$\overline{X}\sim N(μ,\frac{σ^2}{n})$,所以能构造一个枢轴量$\frac{\overline{X}-μ}{\frac{σ}{\sqrt{n}}} \sim N(0,1)$。然后</p>
+<p>$P\{|\frac{\overline{X}-μ}{\frac{σ}{\sqrt{n}}}|&lt;z\} = 1-α$</p>
+<p>$P\{-z &lt; \frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\} = 1-α$</p>
+<p>$P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\} - P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; -z\}=<br>P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\} - (1 - P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\}) = 1-α$</p>
+<p>$2P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\} = 2 - α$</p>
+<p>$P\{\frac{μ-\overline{X}}{\frac{σ}{√n}} &lt; z\} = 1 - \frac{α}{2}$</p>
+<p>$P\{z &lt; \frac{μ-\overline{X}}{\frac{σ}{√n}} \} = \Phi(\frac{μ-\overline{X}}{\frac{σ}{√n}}) = \frac{α}{2}$</p>
+<p>所以我们只要求出$1 - \frac{α}{2}$对应的$z_\frac{α}{2}$,此时其置信区间为$(\overline{X}\pm\frac{σ}{\sqrt{n}}*z_\frac{\alpha}{2})$</p>
+<p>假如总体方差未知。可以考虑使用样本均值$S^2$,此时我们可以构造一个t分布的统计量$\frac{\frac{\overline{X}-μ}{\frac{σ}{√n}}}{\sqrt{\frac{S^2}{σ^2}}}\sim t(n-1)$<br>对统计量化简</p>
+<p>$\frac{\frac{\overline{X}-μ}{\frac{σ}{√n}}}{\sqrt{\frac{S^2}{σ^2}}}=\frac{\overline{X}-μ}{\frac{S}{\sqrt{n}}}$<br>把上述情况原来的σ换成S，z分布换成t分布(t分布和z分布都是对称的)即可得到置信区间$(\overline{X}\pm\frac{S}{\sqrt{n}}*t_\frac{α}{2})$</p>
+<h4 id="总体概率的区间估计"><a href="#总体概率的区间估计" class="headerlink" title="总体概率的区间估计"></a>总体概率的区间估计</h4><p>在大样本下，设X~B(N,p)为抽样条件下符合条件的个数,则抽样概率为$\frac{X}{N}$,而由于二项分布可以视为N个相互独立的0-1分布相加而来，故当N很大时，$P=\frac{X}{N}\sim N(p,\frac{p(1-p)}{N})$（其均值和方差可由性质直接求得）<br>构造z分布$\frac{P-p}{\sqrt{\frac{p(1-p)}{N}}} \sim N(0,1)$,将总体均值的$\overline{X}$换成$P$，$\frac{σ}{\sqrt{n}}$换成$\sqrt{\frac{p(1-p)}{N}}$可得p的置信区间$(P\pm\sqrt{\frac{p(1-p)}{N}}\times z_\frac{α}{2})$,但我们并不知道p是多少，而样本容量比较大，所以我们可以用P代替p，从而$(P\pm\sqrt{\frac{P(1-P)}{N}}\times z_\frac{α}{2})$</p>
+<h4 id="总体方差的区间估计"><a href="#总体方差的区间估计" class="headerlink" title="总体方差的区间估计"></a>总体方差的区间估计</h4><p>假设一个正态分布简单抽出n个样本，有样本方差$s^2$，则可以构造一个统计量$\frac{(n-1)s^2}{σ^2} \sim \chi^2(n-1)$,则有</p>
+<p>$P\{\chi^2_{1-\frac{α}{2}} \le \frac{(n-1)s^2}{σ^2} \le \chi^2_{\frac{α}{2}} \} = 1 - α$</p>
+<p>$P\{\frac{(n-1)\chi^2_{\frac{α}{2}}}{s^2} \le σ^2 \le \frac{(n-1)\chi^2_{1-\frac{α}{2}}}{s^2} \} = 1 - α$</p>
+<h2 id="假设检验"><a href="#假设检验" class="headerlink" title="假设检验"></a>假设检验</h2><p>假设我们蒙一个总体某个数字特征是否准确，但我们不能获取所有样本的所有特征，但我们可以通过获取的一部分样本，在给定的容错率判断我们的总体数字特征是否准确。这就是假设检验。</p>
+<h2 id="方差分析"><a href="#方差分析" class="headerlink" title="方差分析"></a>方差分析</h2>
+            </div>
+            <hr/>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone" data-wechat-qrcode-helper="<p>微信里点“发现”->“扫一扫”二维码便可查看分享。</p>"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        <p class="reprint-tip">
+            <i class="fa fa-exclamation-triangle"></i>&nbsp;&nbsp;
+            <span>转载规则</span>
+        </p>
+        
+            <div class="center-align">
+                <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by/4.0/deed.zh">
+                    <img alt=""
+                         style="border-width:0"
+                         src="https://i.creativecommons.org/l/by/4.0/88x31.png"/>
+                </a>
+            </div>
+            <br/>
+            <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text"
+                  property="dct:title" rel="dct:type">
+                    《初等概率论和统计学》
+                </span> 由
+            <a xmlns:cc="http://creativecommons.org/ns#" href="/2019/11/19/%E7%BB%9F%E8%AE%A1%E5%AD%A6/" property="cc:attributionName"
+               rel="cc:attributionURL">
+                
+            </a> 采用
+            <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by/4.0/deed.zh">
+                知识共享署名 4.0 国际许可协议
+            </a>进行许可。
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fa fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2020/03/16/fourierer-transform/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="傅里叶变换推导">
+                        
+                        <span class="card-title">傅里叶变换推导</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            假设函数f(x)是有周期变化的,且周期为T,则可将函数设成
+$f(x)=C+\sum\limits_{n=1}^{\infty}(a_ncos(\frac{2πn}{T}x)+b_nsin(\frac{2πn}{T}x)) (\frac{2
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-03-16
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-user fa-fw"></i>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/" target="_blank">
+                        <span class="chip bg-color">傅里叶变换</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fa fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2019/09/18/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E5%92%8Clogistics%E5%9B%9E%E5%BD%92%E6%8E%A8%E5%AF%BC/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="线性回归和logistics回归推导">
+                        
+                        <span class="card-title">线性回归和logistics回归推导</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-09-18
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-user fa-fw"></i>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="fa fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fa fa-list"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            // headingsOffset: -205,
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).slideUp(500);
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).slideDown(500);
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+    
+
+</main>
+
+
+    <footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            本站由&nbsp;&copy;<a href="http://yoursite.com" target="_blank"></a>&nbsp;基于
+            <a href="https://hexo.io/" target="_blank">Hexo</a>&nbsp;的
+            <a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>&nbsp;主题搭建
+            <br>
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="fa fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fa fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            <br>
+            <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+            <script>
+                var now = new Date();
+
+                function createtime() {
+                    var grt = new Date("06/28/2019 00:00:00");
+                    now.setTime(now.getTime() + 250);
+                    days = (now - grt) / 1000 / 60 / 60 / 24;
+                    dnum = Math.floor(days);
+                    hours = (now - grt) / 1000 / 60 / 60 - (24 * dnum);
+                    hnum = Math.floor(hours);
+                    if (String(hnum).length == 1) {
+                        hnum = "0" + hnum;
+                    }
+                    minutes = (now - grt) / 1000 / 60 - (24 * 60 * dnum) - (60 * hnum);
+                    mnum = Math.floor(minutes);
+                    if (String(mnum).length == 1) {
+                        mnum = "0" + mnum;
+                    }
+                    seconds = (now - grt) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+                    snum = Math.round(seconds);
+                    if (String(snum).length == 1) {
+                        snum = "0" + snum;
+                    }
+                    document.getElementById("timeDate").innerHTML = "本站已安全运行 " + dnum + " 天 ";
+                    document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+                }
+                setInterval("createtime()", 250);
+            </script>
+            
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fa fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    
+    <script src="/libs/others/clicklove.js"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+        <script>
+        (function(i,s,o,g,r,a,m){i["DaoVoiceObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;a.charset="utf-8";m.parentNode.insertBefore(a,m)})(window,document,"script",('https:' == document.location.protocol ? 'https:' : 'http:') + "//widget.daovoice.io/widget/6984b559.js","daovoice")
+        daovoice('init', {
+            app_id: ""
+        });
+        daovoice('update');
+        </script>
+    
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.bootcss.com/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>
