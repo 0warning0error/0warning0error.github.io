@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "posts/trying-to-intergrate-z3-into-typst/index.html",
+    "href": "posts/trying-to-intergrate-z3-into-typst/index.html",
+    "title": "尝试将z3集成进typst",
+    "section": "",
+    "text": "Z3求解器是一个微软开源的定理证明器，高效好用。有一天我突发奇想，想将其集成进typst中，因为理论上来说定理证明器涉及不到其他环境的交互，但我想的太简单了。最终我放弃了，写此文章记录探索的过程。\n把z3集成进typst最简单的方法：就是编译出纯WASM文件，WASM作为插件。然后用typ文件包装好这个WASM文件，暴露出优雅的接口。\n最开始我的想法是直接写Rust代码调用Z3，但发现Z3-sys的库本质上是调用的编译好的共享库，遂放弃纯Rust方法。\n我开始阅读Z3的文档，然而并没有直接编译成WASM的教程，但却有提供JavaScript的NPM包，也有WASM的bindings。我顺藤摸瓜找到了src/api/js/scripts/build-wasm.ts 这么一个文件，内容如下：\n从这些代码我可以看到首先使用emconfigure配置编译环境，然后用emmake编译出静态库。这些代码刚好给了我启发——我可以先编译出适配的静态库（因为Z3也提供了C语言接口），然后用Rust FFI 调用必要的C接口，结合 这个项目 方便的包装，编译出适配typst的wasm插件。 理想是美好的，现实是骨感的。"
+  },
+  {
+    "objectID": "posts/trying-to-intergrate-z3-into-typst/index.html#第一次尝试",
+    "href": "posts/trying-to-intergrate-z3-into-typst/index.html#第一次尝试",
+    "title": "尝试将z3集成进typst",
+    "section": "第一次尝试",
+    "text": "第一次尝试\n于是，我先按照上面的ts代码，配置好3.1.15版本的emsdk（复现编译器的版本），编译出libz3.a 的静态库。\nemconfigure python scripts/mk_make.py --staticlib --single-threaded --arm64=false\ncd build\nemmake make -j$(nproc) libz3.a\n就这样，一个z3的静态库出炉了，当我欣喜若狂的写好Rust的适配代码调用静态库、链接最后编译出wasm文件、用typst调用wasm的时候，意外发生了——环境不支持SIMD指令。\n原来是typst使用的wasmi库不支持SIMD指令。既然这样，那我就将SIMD的选项去掉。"
+  },
+  {
+    "objectID": "posts/trying-to-intergrate-z3-into-typst/index.html#第二次尝试",
+    "href": "posts/trying-to-intergrate-z3-into-typst/index.html#第二次尝试",
+    "title": "尝试将z3集成进typst",
+    "section": "第二次尝试",
+    "text": "第二次尝试\n因为z3的配置选项并不支持直接屏蔽SIMD选项， 我只能直接对config.mk文件动手，修改后内容如下\nCXXFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE  -std=c++17 -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto\nCFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE   -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto\n为了避免O3优化添加SIMD指令，在其后面添加-mno-simd128和-fno-tree-vectorize以阻止编译器生成带SIMD指令的WASM。\n之后步骤如法炮制。结果运行时编译出来的库的有些符号未定义，查询资料得知有wasi的标准允许wasm和环境互动。emsdk编译出来的环境属于标准的wasi环境，需要对某些函数stub。"
+  },
+  {
+    "objectID": "posts/trying-to-intergrate-z3-into-typst/index.html#第三次尝试到放弃",
+    "href": "posts/trying-to-intergrate-z3-into-typst/index.html#第三次尝试到放弃",
+    "title": "尝试将z3集成进typst",
+    "section": "第三次尝试到放弃",
+    "text": "第三次尝试到放弃\n我按照指令对关键函数stub,结果还是出现了符号未定义的问题。我将有些符号提取出来自己做了符号的定义。\n#[no_mangle]\npub extern \"C\" fn __call_sighandler(a:i32,b:i32){\n\n}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_date_now() -&gt; f64 {\n    1.0\n}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_get_now_is_monotonic() -&gt; i32 {\n    // Assume the time source is monotonic\n    1\n}\n__call_sighandler 是处理信号用的，为了方便留下了空函数，_emscripten_date_now和_emscripten_get_now_is_monotonic则是emscripten环境下获取时间的函数。我猜测z3获取时间是为了不让计算的时间超过timeout，为了简化起见我设置成了时间是固定的，永远都是单调（递增）的。\n原本以为定义了函数，又stub了不需要的函数就万事大吉了，结果最后老天给我开了一个玩笑。\nerror: plugin panicked: wasm `unreachable` instruction executed\n   ┌─ test.typ:14:11\n   │\n14 │   let ctx = z3.mk_context(cfg)\n   │             ^^^^^^^^^^^^^^^^^^\n事已至此，我认为如果要完全将z3移植到typst里，就需要深入z3的代码之中，改动可能很大，而且也不一定能成功，遂放弃。"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "编程之眼",
+    "section": "",
+    "text": "trying to integrate Z3 into Typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\n尝试将z3集成进typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "你好，这个博客是使用的Quarto编写并发布的，最开始想找一个炫酷的界面作为我的博客， astro.build是当时我想尝试的框架，但因为没时间钻研前端框架，最后选择了使用Quarto。"
+  },
+  {
+    "objectID": "posts/trying-to-intergrate-z3-into-typst/english.html",
+    "href": "posts/trying-to-intergrate-z3-into-typst/english.html",
+    "title": "trying to integrate Z3 into Typst",
+    "section": "",
+    "text": "Z3 Solver is an efficient and user-friendly theorem prover developed by Microsoft and made open-source. One day, I had a sudden inspiration to integrate it into Typst, as theoretically, a theorem prover doesn’t require interaction with other environments. However, I underestimated the complexity. Eventually, I gave up and wrote this article to document the exploration process.\n\nThe Simplest Method to Integrate Z3 into Typst\nThe simplest way to integrate Z3 into Typst is to compile it into a pure WASM file and use it as a plugin. Then, package this WASM file with a Typst file, exposing a neat interface.\nInitially, my idea was to write Rust code directly calling Z3, but I found that the Z3-sys library essentially calls the precompiled shared library, so I abandoned the pure Rust approach.\n\n\nExploring Z3 Documentation\nI began reading the Z3 documentation, but there was no direct tutorial for compiling it into WASM. However, there was an NPM package for JavaScript and WASM bindings. Following the clues, I found a file named src/api/js/scripts/build-wasm.ts with the following content:\n// ...\n// TODO (ritave): Detect if it's in the configuration we need\nif (!existsSync(path.join(z3RootDir, 'build/Makefile'))) {\n  spawnSync('emconfigure python scripts/mk_make.py --staticlib --single-threaded --arm64=false', {\n    cwd: z3RootDir,\n  });\n}\n\nspawnSync(`emmake make -j${os.cpus().length} libz3.a`, { cwd: path.join(z3RootDir, 'build') });\n\n// ...\nFrom this code, I saw that it first configures the build environment using emconfigure, then compiles a static library using emmake. This inspired me—I could first compile a compatible static library (since Z3 also provides a C interface) and then use Rust FFI to call the necessary C interfaces. Combining this with this project for convenient packaging, I could compile a WASM plugin suitable for Typst. However, the reality was not as smooth as the ideal.\n\n\nFirst Attempt\nFollowing the above TypeScript code, I configured version 3.1.15 of emsdk (to reproduce the compiler version) and compiled the static library libz3.a.\nemconfigure python scripts/mk_make.py --staticlib --single-threaded --arm64=false\ncd build\nemmake make -j$(nproc) libz3.a\nWith a static library of Z3 at hand, I enthusiastically wrote Rust code to call the static library, linked it, compiled it into a WASM file, and called the WASM with Typst. Then the unexpected happened—the environment does not support SIMD instructions.\nIt turned out that the wasmi library used by Typst does not support SIMD instructions. So, I removed the SIMD options.\n\n\nSecond Attempt\nSince Z3’s configuration options do not directly support disabling SIMD, I had to modify the config.mk file manually. The modified content is as follows:\nCXXFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE  -std=c++17 -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto\nCFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE   -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto\nTo avoid SIMD instructions being added by the O3 optimization, I added -mno-simd128 and -fno-tree-vectorize to prevent the compiler from generating WASM with SIMD instructions.\nFollowing the same steps, I found that some symbols were undefined at runtime. Upon further investigation, I learned that the standard wasi allows WASM and the environment to interact. The environment compiled by emsdk is a standard wasi environment, which requires stubbing some functions.\n\n\nThird Attempt and Giving Up\nFollowing the instructions, I stubbed the critical functions, but the symbol undefined issue persisted. I extracted some symbols and defined them myself.\n#[no_mangle]\npub extern \"C\" fn __call_sighandler(a: i32, b: i32) {}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_date_now() -&gt; f64 {\n    1.0\n}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_get_now_is_monotonic() -&gt; i32 {\n    // Assume the time source is monotonic\n    1\n}\n__call_sighandler is used for handling signals, and I left it as an empty function for convenience. _emscripten_date_now and _emscripten_get_now_is_monotonic are functions for getting time in the emscripten environment. I guessed that Z3 uses time to prevent calculations from exceeding a timeout, so I set the time to be constant and always monotonic (increasing).\nI thought that defining these functions and stubbing unnecessary ones would solve all problems, but in the end, fate played a trick on me.\nerror: plugin panicked: wasm `unreachable` instruction executed\n   ┌─ test.typ:14:11\n   │\n14 │   let ctx = z3.mk_context(cfg)\n   │             ^^^^^^^^^^^^^^^^^^\nAt this point, I concluded that to fully port Z3 into Typst, one would need to delve deeply into the Z3 codebase, possibly making significant changes with no guarantee of success. Therefore, I decided to give up."
+  }
+]
