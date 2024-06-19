@@ -1,0 +1,16 @@
+---
+title: "About"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/%E8%BF%9C%E8%88%AA-%E8%B5%B5-0ba9b8228/
+    - icon: github
+      text: Github
+      href: https://github.com/0warning0error
+
+---
+
+你好，这个博客是使用的Quarto编写并发布的，最开始想找一个炫酷的界面作为我的博客， [astro.build](https://astro.build/)是当时我想尝试的框架，但因为没时间钻研前端框架，最后选择了使用Quarto。

@@ -1,0 +1,17 @@
+project:
+  type: website
+
+website:
+  title: "编程之眼"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/0warning0error
+format:
+  html:
+    theme: lux
+    css: styles.css
+
+
+

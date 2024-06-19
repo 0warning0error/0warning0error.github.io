@@ -1,0 +1,82 @@
+---
+title: "尝试将z3集成进typst"
+author: "0warning0error"
+date: "2024-06-19"
+categories: [code, typst]
+---
+[Z3求解器](https://github.com/Z3Prover/z3)是一个微软开源的定理证明器，高效好用。有一天我突发奇想，想将其集成进typst中，因为理论上来说定理证明器涉及不到其他环境的交互，但我想的太简单了。最终我放弃了，写此文章记录探索的过程。
+
+把z3集成进typst最简单的方法：就是编译出纯WASM文件，WASM作为插件。然后用typ文件包装好这个WASM文件，暴露出优雅的接口。
+
+最开始我的想法是直接写Rust代码调用Z3，但发现Z3-sys的库本质上是调用的编译好的共享库，遂放弃纯Rust方法。
+
+我开始阅读Z3的文档，然而并没有直接编译成WASM的教程，但却有提供JavaScript的NPM包，也有WASM的bindings。我顺藤摸瓜找到了`src/api/js/scripts/build-wasm.ts` 这么一个文件，内容如下：
+```typescript
+// ...
+// TODO(ritave): Detect if it's in the configuration we need
+if (!existsSync(path.join(z3RootDir, 'build/Makefile'))) {
+  spawnSync('emconfigure python scripts/mk_make.py --staticlib --single-threaded --arm64=false', {
+    cwd: z3RootDir,
+  });
+}
+
+spawnSync(`emmake make -j${os.cpus().length} libz3.a`, { cwd: path.join(z3RootDir, 'build') });
+
+// ...
+```
+从这些代码我可以看到首先使用emconfigure配置编译环境，然后用emmake编译出静态库。这些代码刚好给了我启发——我可以先编译出适配的静态库（因为Z3也提供了C语言接口），然后用Rust FFI 调用必要的C接口，结合 [这个项目](https://github.com/astrale-sharp/wasm-minimal-protocol) 方便的包装，编译出适配typst的wasm插件。 理想是美好的，现实是骨感的。
+
+## 第一次尝试
+于是，我先按照上面的ts代码，配置好3.1.15版本的emsdk（复现编译器的版本），编译出libz3.a 的静态库。
+```sh
+emconfigure python scripts/mk_make.py --staticlib --single-threaded --arm64=false
+cd build
+emmake make -j$(nproc) libz3.a
+```
+
+就这样，一个z3的静态库出炉了，当我欣喜若狂的写好Rust的适配代码调用静态库、链接最后编译出wasm文件、用typst调用wasm的时候，意外发生了——**环境不支持SIMD指令。**
+
+原来是typst使用的[wasmi](https://crates.io/crates/wasmi)库不支持SIMD指令。既然这样，那我就将SIMD的选项去掉。
+
+## 第二次尝试
+
+因为z3的配置选项并不支持直接屏蔽SIMD选项， 我只能直接对config.mk文件动手，修改后内容如下
+```sh
+CXXFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE  -std=c++17 -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto
+CFLAGS= -D_MP_INTERNAL -DNDEBUG -D_EXTERNAL_RELEASE   -fvisibility=hidden -fvisibility-inlines-hidden -c -DSINGLE_THREAD -O3 -mno-simd128 -fno-tree-vectorize -fPIC -flto
+
+```
+为了避免O3优化添加SIMD指令，在其后面添加`-mno-simd128`和`-fno-tree-vectorize`以阻止编译器生成带SIMD指令的WASM。
+
+之后步骤如法炮制。结果运行时编译出来的库的有些符号未定义，查询资料得知有wasi的标准允许wasm和环境互动。emsdk编译出来的环境属于标准的wasi环境，需要对某些函数stub。
+
+## 第三次尝试到放弃
+我按照[指令](https://github.com/astrale-sharp/wasm-minimal-protocol/tree/master/examples/hello_c)对关键函数stub,结果还是出现了符号未定义的问题。我将有些符号提取出来自己做了符号的定义。
+```rust
+#[no_mangle]
+pub extern "C" fn __call_sighandler(a:i32,b:i32){
+
+}
+
+#[no_mangle]
+pub extern "C" fn _emscripten_date_now() -> f64 {
+    1.0
+}
+
+#[no_mangle]
+pub extern "C" fn _emscripten_get_now_is_monotonic() -> i32 {
+    // Assume the time source is monotonic
+    1
+}
+```
+__call_sighandler 是处理信号用的，为了方便留下了空函数，_emscripten_date_now和_emscripten_get_now_is_monotonic则是emscripten环境下获取时间的函数。我猜测z3获取时间是为了不让计算的时间超过timeout，为了简化起见我设置成了时间是固定的，永远都是单调（递增）的。
+
+原本以为定义了函数，又stub了不需要的函数就万事大吉了，结果最后老天给我开了一个玩笑。
+```bash
+error: plugin panicked: wasm `unreachable` instruction executed
+   ┌─ test.typ:14:11
+   │
+14 │   let ctx = z3.mk_context(cfg)
+   │             ^^^^^^^^^^^^^^^^^^
+```
+事已至此，我认为如果要完全将z3移植到typst里，就需要深入z3的代码之中，改动可能很大，而且也不一定能成功，遂放弃。
