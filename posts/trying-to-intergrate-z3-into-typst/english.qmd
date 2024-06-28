@@ -1,7 +1,7 @@
 ---
 title: "trying to integrate Z3 into Typst"
 author: "0warning0error"
-date: "2024-06-19"
+date: "2023-06-19"
 categories: [code, typst]
 ---
 [Z3 Solver](https://github.com/Z3Prover/z3) is an efficient and user-friendly theorem prover developed by Microsoft and made open-source. One day, I had a sudden inspiration to integrate it into Typst, as theoretically, a theorem prover doesn't require interaction with other environments. However, I underestimated the complexity. Eventually, I gave up and wrote this article to document the exploration process.

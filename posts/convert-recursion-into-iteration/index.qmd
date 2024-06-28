@@ -1,0 +1,155 @@
+---
+title: "将递归转成迭代"
+author: "0warning0error"
+date: "2024-06-19"
+categories: [code, 数据结构和算法(data structure and algorithms)]
+---
+
+函数的递归调用是简单易懂的编码方式，在某些问题上，函数递归可以提供更为简洁的代码实现和更为直观的阅读理解，比如说我们很熟悉的树形结构的遍历。
+
+然而，当函数调用的层数过多的时候，就可能导致常见的栈溢出，这是因为栈空间一般是有严格的大小限制。虽然我们可以通过配置参数来调整程序的栈空间大小，但只是杯水车薪，无助于解决根本问题。
+
+我们从另一个角度看待问题：操作系统调用函数会保存栈信息（比如函数返回后的下一条指令所在的位置、局部变量等），在其中隐式地含有每一个函数调用的状态，函数通过查看这个状态来决定是否已满足停止条件，所以我们自然而然地想到用栈数据结构来模拟函数递归的过程。
+
+结合状态机的知识，将递归版本的函数改为迭代版本的函数的思想不难分析，假如我们有如下递归版本的函数：
+```cpp
+void func(...args){
+    // 局部变量列表(函数参数也是局部变量的一部分)
+    doSomething();
+    
+    // 在某处出现了递归调用
+    func(...args1);
+}
+```
+
+然后我们可以设置一个状态结构体保存递归版本被调用时的函数信息，一部分保存当前调用栈的函数变量信息，最后保存运行时候的位置。假如函数有返回值，可以用一个变量存储返回值：
+```cpp
+enum Loc{
+    START;
+    FIRST;
+    SECOND;
+    THIRD;
+    // ...等等位置信息
+};
+struct State{
+    //局部参数列表
+    struct Info context;
+    // 运行时候的位置
+    enum Loc location;
+};
+void func(...args){
+    stack<State> s;
+    State init_state = {}; //设置初始的状态。
+    s.push(std::move(init_state));
+    while(!s.empty()){
+        State & cnt_state = s.top();
+        switch(cnt_state.location){
+            case START:
+                doSomething();
+            case FIRST:
+                cnt_state.location = SECOND;
+                cnt_state.context = ...;
+                State new_state = {...};
+                s.push(new_state);
+                continue;
+            //....
+        }
+    }
+}
+```
+我们以leetcode的中序遍历为例子，不难写出下面的递归版本：
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> res;
+        if(root == nullptr){
+            return res;
+        }
+        vector<int> && left = inorderTraversal(root -> left);
+        res.insert(res.end(),left.begin(),left.end());
+        res.push_back(root -> val);
+
+        vector<int> && right = inorderTraversal(root -> right);
+        res.insert(res.end(),right.begin(),right.end());
+        return res;
+    }
+};
+```
+中序遍历有2个递归调用点：一个是访问左子树的时候，另一个是读取中间的节点后的右子树的时候；和一个本身调用点。 而因为整个函数比较重要的局部变量是 参数root，所以结构体只需要保存一个参数。
+最后迭代版本的中序遍历如下
+
+```cpp
+enum Loc{
+    START,           // 初始状态，表示节点刚被访问
+    VISITED_LEFT,    // 左子节点已访问
+    VISITED_MIDDLE,  // 中间节点已访问
+};
+
+struct State {
+    TreeNode *node;  // 当前节点
+    Loc location;    // 当前节点的访问状态
+};
+
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> result;
+        stack<State> s;
+
+        // 辅助函数，将节点及其状态压入栈中
+        auto pushState = [&](TreeNode *node) {
+            s.push({node, START});
+        };
+
+        // 初始条件，根节点不为空时压入栈
+        if (root != nullptr) {
+            pushState(root);
+        }
+
+        // 模拟递归调用的循环
+        while (!s.empty()) {
+            State &cnt_state = s.top(); // 获取栈顶元素，模拟当前函数调用的参数和局部变量
+
+            switch (cnt_state.location) {
+                case START:
+                    // 首次访问节点，先访问左子树
+                    if (cnt_state.node->left != nullptr) {
+                        cnt_state.location = VISITED_LEFT;  // 修改状态为已访问左子节点
+                        pushState(cnt_state.node->left);   // 将左子节点压入栈
+                        continue;                          // 提前结束本次循环
+                    }
+                case VISITED_LEFT:
+                    // 左子树访问完毕，访问当前节点
+                    result.push_back(cnt_state.node->val); // 将节点值加入结果
+                    cnt_state.location = VISITED_MIDDLE;   // 修改状态为已访问中间节点
+                    // 访问右子树
+                    if (cnt_state.node->right != nullptr) {
+                        pushState(cnt_state.node->right);  // 将右子节点压入栈
+                        continue;
+                    }
+                case VISITED_MIDDLE:
+                    // 当前节点及其左右子树都已访问完毕，返回出栈
+                    s.pop();
+                    continue;
+            }
+        }
+
+        return result;
+    }
+};
+
+```
+
+

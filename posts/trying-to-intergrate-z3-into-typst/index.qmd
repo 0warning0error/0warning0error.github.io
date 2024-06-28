@@ -1,7 +1,7 @@
 ---
 title: "尝试将z3集成进typst"
 author: "0warning0error"
-date: "2024-06-19"
+date: "2023-06-19"
 categories: [code, typst]
 ---
 [Z3求解器](https://github.com/Z3Prover/z3)是一个微软开源的定理证明器，高效好用。有一天我突发奇想，想将其集成进typst中，因为理论上来说定理证明器涉及不到其他环境的交互，但我想的太简单了。最终我放弃了，写此文章记录探索的过程。
@@ -69,7 +69,7 @@ pub extern "C" fn _emscripten_get_now_is_monotonic() -> i32 {
     1
 }
 ```
-__call_sighandler 是处理信号用的，为了方便留下了空函数，_emscripten_date_now和_emscripten_get_now_is_monotonic则是emscripten环境下获取时间的函数。我猜测z3获取时间是为了不让计算的时间超过timeout，为了简化起见我设置成了时间是固定的，永远都是单调（递增）的。
+`__call_sighandler` 是处理信号用的，为了方便留下了空函数，`_emscripten_date_now`和`_emscripten_get_now_is_monotonic`则是emscripten环境下获取时间的函数。我猜测z3获取时间是为了不让计算的时间超过timeout，为了简化起见我设置成了时间是固定的，永远都是单调（递增）的。
 
 原本以为定义了函数，又stub了不需要的函数就万事大吉了，结果最后老天给我开了一个玩笑。
 ```bash
