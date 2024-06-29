@@ -42,6 +42,13 @@
     "text": "第三次尝试到放弃\n我按照指令对关键函数stub,结果还是出现了符号未定义的问题。我将有些符号提取出来自己做了符号的定义。\n#[no_mangle]\npub extern \"C\" fn __call_sighandler(a:i32,b:i32){\n\n}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_date_now() -&gt; f64 {\n    1.0\n}\n\n#[no_mangle]\npub extern \"C\" fn _emscripten_get_now_is_monotonic() -&gt; i32 {\n    // Assume the time source is monotonic\n    1\n}\n__call_sighandler 是处理信号用的，为了方便留下了空函数，_emscripten_date_now和_emscripten_get_now_is_monotonic则是emscripten环境下获取时间的函数。我猜测z3获取时间是为了不让计算的时间超过timeout，为了简化起见我设置成了时间是固定的，永远都是单调（递增）的。\n原本以为定义了函数，又stub了不需要的函数就万事大吉了，结果最后老天给我开了一个玩笑。\nerror: plugin panicked: wasm `unreachable` instruction executed\n   ┌─ test.typ:14:11\n   │\n14 │   let ctx = z3.mk_context(cfg)\n   │             ^^^^^^^^^^^^^^^^^^\n事已至此，我认为如果要完全将z3移植到typst里，就需要深入z3的代码之中，改动可能很大，而且也不一定能成功，遂放弃。"
   },
   {
+    "objectID": "posts/io-uring/index.html",
+    "href": "posts/io-uring/index.html",
+    "title": "关于io_uring的两三事",
+    "section": "",
+    "text": "io_uring 是 2019 年 Linux 5.1 内核首次引入的高性能 异步 I/O 框架，能显著加速 I/O 密集型应用的性能。 它有如下优点： - 统一了 Linux 异步 I/O 框架： Linux AIO 只支持 direct I/O 模式的存储文件（storage file） - 在设计上是真正的异步 I/O"
+  },
+  {
     "objectID": "posts/trying-to-intergrate-z3-into-typst/english.html",
     "href": "posts/trying-to-intergrate-z3-into-typst/english.html",
     "title": "trying to integrate Z3 into Typst",
@@ -60,6 +67,6 @@
     "href": "index.html",
     "title": "编程之眼",
     "section": "",
-    "text": "convert recursion into iteration\n\n\n\n\n\n\ncode\n\n\n数据结构和算法(data structure and algorithms)\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\n将递归转成迭代\n\n\n\n\n\n\ncode\n\n\n数据结构和算法(data structure and algorithms)\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\ntrying to integrate Z3 into Typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2023\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\n尝试将z3集成进typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2023\n\n\n0warning0error\n\n\n\n\n\n\nNo matching items"
+    "text": "关于io_uring的两三事\n\n\n\n\n\n\nLinux\n\n\n\n\n\n\n\n\n\nJun 29, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\nconvert recursion into iteration\n\n\n\n\n\n\ncode\n\n\n数据结构和算法(data structure and algorithms)\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\n将递归转成迭代\n\n\n\n\n\n\ncode\n\n\n数据结构和算法(data structure and algorithms)\n\n\n\n\n\n\n\n\n\nJun 19, 2024\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\ntrying to integrate Z3 into Typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2023\n\n\n0warning0error\n\n\n\n\n\n\n\n\n\n\n\n\n尝试将z3集成进typst\n\n\n\n\n\n\ncode\n\n\ntypst\n\n\n\n\n\n\n\n\n\nJun 19, 2023\n\n\n0warning0error\n\n\n\n\n\n\nNo matching items"
   }
 ]
