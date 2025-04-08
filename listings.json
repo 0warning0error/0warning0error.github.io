@@ -2,7 +2,12 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/designing-readers–writer-lock/index.html",
+      "/posts/database-1/index.html",
+      "/posts/lvalue-rvalue/index.html",
       "/posts/io-uring/index.html",
+      "/posts/thinking-of-trap-problem/index.html",
+      "/posts/understanding-dijkstra-algorithm/index.html",
       "/posts/convert-recursion-into-iteration/english.html",
       "/posts/convert-recursion-into-iteration/index.html",
       "/posts/trying-to-intergrate-z3-into-typst/english.html",

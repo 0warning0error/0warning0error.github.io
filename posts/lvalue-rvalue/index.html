@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="0warning0error">
-<meta name="dcterms.date" content="2024-06-29">
+<meta name="dcterms.date" content="2024-07-11">
 
-<title>关于io_uring的两三事 – 编程之眼</title>
+<title>左值和右值 – 编程之眼</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -144,9 +144,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">关于io_uring的两三事</h1>
+      <h1 class="title">左值和右值</h1>
                                 <div class="quarto-categories">
-                <div class="quarto-category">Linux</div>
+                <div class="quarto-category">C++</div>
               </div>
                   </div>
   </div>
@@ -164,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">June 29, 2024</p>
+        <p class="date">July 11, 2024</p>
       </div>
     </div>
     
@@ -183,118 +183,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p><code>io_uring</code> 是 2019 年 Linux 5.1 内核首次引入的高性能异步 I/O 框架，能显著加速 I/O 密集型应用的性能。 它有如下优点： - 统一了 Linux 异步 I/O 框架： Linux AIO 只支持 direct I/O 模式的存储文件（storage file） - 在设计上是真正的异步 I/O</p>
-<p>Linux中的IO复用发展已有很多年的历史。</p>
-<section id="linux-io复用历史" class="level1">
-<h1>Linux IO复用历史</h1>
-<section id="select-调用" class="level2">
-<h2 class="anchored" data-anchor-id="select-调用">select 调用</h2>
-<p><code>select</code> 是最早期的 I/O 复用机制之一。它允许一个程序监视多个文件描述符，以查看它们是否可读、可写或有错误条件出现。<code>select</code> 的主要特点是： - 简单易用，适合小规模的文件描述符集 - 跨平台支持广泛，几乎所有的 Unix 系统和类 Unix 系统都支持 <code>select</code></p>
-<p>然而，<code>select</code> 也存在明显的缺陷： - 每次调用 <code>select</code> 都需要重新传递文件描述符集，效率较低 - 文件描述符数量有限制（通常为 1024），不适用于高并发场景 - 随着文件描述符数量增加，性能急剧下降</p>
-<p>假设我们有个叫is_ready的函数（非阻塞检测IO接口是否准备好了），select 的实现原理可以使用下面的伪代码表示：</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns true if fd is ready for I/O.</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> is_ready<span class="op">(</span><span class="dt">int</span> fd<span class="op">);</span></span>
+<p>C++的左值和右值是比较有理解难度的概念。每个 C++ 表达式都有一个类型，属于某个值类别。 值类别是编译器在表达式计算期间创建、复制和移动临时对象时必须遵循的规则的基础。</p>
+<p>在C++11中，值类型有以下分类： - prvalue 是一个表达式，计算结果可以用于初始化对象或位域，或计算运算符的操作数值 - xvalue 是一个表达式，表示一个对象或位域，该对象或位域的资源可重复使用（通常是因为它接近其生存期的末尾）。 比如：<code>std::move</code>的结果，和返回右值引用的函数 - lvalue 是一个表达式，计算结果可以确定对象、位域或函数的标识</p>
+<section id="例子" class="level2">
+<h2 class="anchored" data-anchor-id="例子">例子</h2>
+<p>为了方便理解， 下面可以看看一些例子：</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;utility&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> fd_info <span class="op">{</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> fd<span class="op">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> ready<span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> select<span class="op">(</span>set<span class="op">&lt;</span>fd_info<span class="op">&gt;</span> fds<span class="op">,</span> <span class="dt">int</span> max_fd<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> ready_cnt <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ready_cnt <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> max_fd<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>is_ready<span class="op">(</span>i<span class="op">))</span> <span class="op">{</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">auto</span> it <span class="op">=</span> fds<span class="op">.</span>find<span class="op">(</span>i<span class="op">);</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        it<span class="op">-&gt;</span>ready <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        ready_cnt<span class="op">++;</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ready_cnt<span class="op">;</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> result <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    result<span class="op">()</span> <span class="op">:</span> a<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>result<span class="op">()</span> <span class="op">{</span> </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"~result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span> </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">&amp;&amp;</span> func<span class="op">(){</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    result r<span class="op">;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>move<span class="op">(</span>r<span class="op">);</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"first line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    result a<span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    a<span class="op">;</span> <span class="co">// lvalue</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    result<span class="op">();</span> <span class="co">// prvalue</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> result<span class="op">();</span> <span class="co">// prvalue</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> func<span class="op">();</span> <span class="co">// xvalue</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"last line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>我们可以看到， <code>a</code> 因为表达式的结果是可以获取地址的，所以<code>a</code>属于<code>lvalue</code>，<code>result()</code>因为计算结果是没有地址的，所以属于<code>prvalue</code>，而<code>func()</code> 返回的是快要消亡的具名对象，所以<code>func()</code>返回的是<code>xvalue</code>。</p>
 </section>
-<section id="poll-调用" class="level2">
-<h2 class="anchored" data-anchor-id="poll-调用">poll 调用</h2>
-<p>为了克服 <code>select</code> 的一些缺点，Linux 引入了 <code>poll</code> 调用。<code>poll</code> 的功能与 <code>select</code> 类似，但有以下改进： - 传递文件描述符集的方式更加灵活，避免了 <code>select</code> 中的复制开销 - 不存在文件描述符数量的硬性限制，可以处理更大的文件描述符集</p>
-<p>假设我们有个叫is_ready的函数（非阻塞检测IO接口是否准备好了），select 的实现原理可以使用下面的伪代码表示：</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns true if fd is ready for I/O.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> is_ready<span class="op">(</span><span class="dt">int</span> fd<span class="op">);</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> fd_info <span class="op">{</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> fd<span class="op">;</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> ready<span class="op">;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> poll<span class="op">(</span><span class="kw">struct</span> fd_info<span class="op">*</span> fds<span class="op">,</span> <span class="dt">int</span> nfds<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> ready_cnt <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span><span class="op">(</span>ready_cnt <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> nfds<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>is_ready<span class="op">(</span>fds<span class="op">[</span>i<span class="op">]))</span> <span class="op">{</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        fds<span class="op">[</span>i<span class="op">].</span>ready <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        ready_cnt<span class="op">++;</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        fds<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ready_cnt<span class="op">;</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>尽管 <code>poll</code> 改善了 <code>select</code> 的一些问题，但它仍然存在性能瓶颈，尤其是在监视大量文件描述符时。每次调用 <code>poll</code> 仍然需要线性扫描整个文件描述符集，导致性能不佳。</p>
+<section id="右值生命周期延长规则" class="level2">
+<h2 class="anchored" data-anchor-id="右值生命周期延长规则">右值生命周期延长规则</h2>
+<p>当右值引用（T&amp;&amp;）或const左值引用（const T&amp;）绑定prvalue时，临时对象的生命周期会被延长至引用的作用域结束。</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>string<span class="op">&amp;</span> s1 <span class="op">=</span> <span class="st">"Hello"</span><span class="op">;</span>  <span class="co">// 临时字符串生命周期延长至s1作用域结束，内容不可变</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string<span class="op">&amp;&amp;</span> s2 <span class="op">=</span> <span class="bu">std::</span>string<span class="op">(</span><span class="st">"World"</span><span class="op">);</span>  <span class="co">// 临时对象生命周期延长至s2作用域结束，内容可变</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="epoll-调用" class="level2">
-<h2 class="anchored" data-anchor-id="epoll-调用">epoll 调用</h2>
-<p>为了进一步提高 I/O 复用的性能，Linux 2.5.44 版本引入了 <code>epoll</code>。<code>epoll</code> 相比 <code>select</code> 和 <code>poll</code> 有显著的性能优势，特别是在处理大量文件描述符时。<code>epoll</code> 的主要特点包括： - 使用事件驱动机制，只在文件描述符状态改变时通知应用程序，避免了不必要的扫描 - 支持边缘触发（edge-triggered）和水平触发（level-triggered）模式，更加灵活 - 提供了 <code>epoll_create</code>、<code>epoll_ctl</code> 和 <code>epoll_wait</code> 接口，便于管理和使用 假设我们有一个<code>add_monitor</code>函数，会事件循环监测all_fds的变化。epoll相关函数的伪代码如下</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Start monitoring fds in `all_fds` and constantly adds ready ones to</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// `ready_fds`.</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> add_monitor<span class="op">(</span><span class="dt">const</span> vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;&amp;</span> all_fds<span class="op">,</span> vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;&amp;</span> ready_fds<span class="op">);</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> fd_info <span class="op">{</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> fd<span class="op">;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> ready<span class="op">;</span></span>
+<section id="c17-中-prvalue的变化" class="level2">
+<h2 class="anchored" data-anchor-id="c17-中-prvalue的变化">C++17 中 prvalue的变化</h2>
+<p>到了C++17， prvalue被弱化成只初始化对象，不再是不能被移动的临时对象。</p>
+<p>比如下面的代码</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NonCopyable <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span> <span class="dt">int</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">()</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">(</span><span class="at">const</span> NonCopyable <span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span><span class="at">const</span> NonCopyable<span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> epoll_info <span class="op">{</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> all_fds<span class="op">;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> ready_fds<span class="op">;</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>map<span class="op">&lt;</span><span class="dt">int</span><span class="op">,</span> epoll_info<span class="op">&gt;</span> epoll_info_by_epoll_id<span class="op">;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Create an epoll instance and return its id.</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> epoll_create<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> epoll_info_by_epoll_fd<span class="op">.</span>size<span class="op">();</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">// Add a fd to monitor to the epoll instance.</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> epoll_add<span class="op">(</span><span class="dt">int</span> epoll_id<span class="op">,</span> <span class="dt">int</span> fd<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  epoll_info_by_epoll_id<span class="op">[</span>epoll_id<span class="op">].</span>push_back<span class="op">(</span>fd<span class="op">);</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">// Wait until at least one fd is ready. Return number of ready fds.</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Afte the function returns, the first `ready_cnt` of `ready_fds` contain</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">// ready fds. The rest can be ignored.</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> epoll_wait<span class="op">(</span><span class="dt">int</span> epoll_id<span class="op">,</span> <span class="kw">struct</span> fd_info<span class="op">*</span> ready_fds<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> ready_cnt <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> epoll_info info <span class="op">=</span> epoll_info_by_epoll_id<span class="op">[</span>epoll_id<span class="op">];</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  add_monitor<span class="op">(</span>info<span class="op">.</span>allfds<span class="op">,</span> info<span class="op">.</span>ready_fds<span class="op">);</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ready_cnt <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    ready_cnt <span class="op">=</span> ready_fds<span class="op">.</span>size<span class="op">();</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> ready_cnt<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>      ready_fds<span class="op">[</span>i<span class="op">].</span>fd <span class="op">=</span> ready_fds<span class="op">[</span>i<span class="op">];</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>      ready_fds<span class="op">[</span>i<span class="op">].</span>ready <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ready_cnt<span class="op">;</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="io_uring-的出现" class="level2">
-<h2 class="anchored" data-anchor-id="io_uring-的出现">io_uring 的出现</h2>
-<p><code>io_uring</code> 的引入标志着 Linux I/O 复用的一个新高度。相较于之前的机制，<code>io_uring</code> 提供了更高的性能和更低的延迟，特别适用于 I/O 密集型应用。其主要优势包括： - 通过环形缓冲区实现真正的异步 I/O，无需频繁的系统调用 - 支持多种 I/O 操作类型，不仅限于文件描述符 - 更高效的事件通知机制，减少了应用程序和内核之间的交互开销</p>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> <span class="dt">int</span> i <span class="op">=</span> NonCopyable<span class="op">{};</span>                 <span class="co">//1</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> NonCopyable v <span class="op">=</span> NonCopyable<span class="op">{};</span>         <span class="co">//2</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>在C++17以前，2是不行的，这是因为 C++11 要求 RVO 或者 NRVO 也一定是需要有复制 / 移动构造函数的。而到了C++17，2是可以的，是因为 prvalue 仅仅只是一个初始化器，不是对象，不会发生拷贝，C++编译器会直接让prvalue对象在v的原地初始化，等价于<code>NonCopyable v{}</code>。 在汇编层面，会在进入函数之前传递v对象的地址，进入构造函数以后原地初始化。</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
