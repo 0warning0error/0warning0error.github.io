@@ -9,7 +9,7 @@
 <meta name="author" content="0warning0error">
 <meta name="dcterms.date" content="2025-04-07">
 
-<title>左值和右值 – 编程之眼</title>
+<title>shared_ptr底层原理 – 编程之眼</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -144,7 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">左值和右值</h1>
+      <h1 class="title">shared_ptr底层原理</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">C++</div>
               </div>
@@ -183,73 +183,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>C++的左值和右值是比较有理解难度的概念。每个 C++ 表达式都有一个类型，属于某个值类别。 值类别是编译器在表达式计算期间创建、复制和移动临时对象时必须遵循的规则的基础。</p>
-<p>在C++11中，值类型有以下分类：</p>
-<ul>
-<li><p>prvalue 是一个表达式，计算结果可以用于初始化对象或位域，或计算运算符的操作数值</p></li>
-<li><p>xvalue 是一个表达式，表示一个对象或位域，该对象或位域的资源可重复使用（通常是因为它接近其生存期的末尾）。 比如：<code>std::move</code>的结果，和返回右值引用的函数</p></li>
-<li><p>lvalue 是一个表达式，计算结果可以确定对象、位域或函数的标识</p></li>
-</ul>
-<section id="例子" class="level2">
-<h2 class="anchored" data-anchor-id="例子">例子</h2>
-<p>为了方便理解， 下面可以看看一些例子：</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;utility&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> result <span class="op">{</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span><span class="op">:</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a<span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    result<span class="op">()</span> <span class="op">:</span> a<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">{</span> </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<p><code>shared_ptr</code> 原理是引用计数。每多一个shared指针指向同一个对象时，引用+1，而析构则相反，如果计数为零，则保存的指针被删除。</p>
+<p>那shared_ptr 内部是什么样的呢？我们可以看GCC库中shared_ptr的源码。</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> _Tp<span class="op">,</span> _Lock_policy _Lp<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">class</span> __shared_ptr</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">:</span> <span class="kw">public</span> __shared_ptr_access<span class="op">&lt;</span>_Tp<span class="op">,</span> _Lp<span class="op">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">using</span> <span class="dt">element_type</span> <span class="op">=</span> <span class="kw">typename</span> remove_extent<span class="op">&lt;</span>_Tp<span class="op">&gt;::</span>type<span class="op">;</span> <span class="co">// 移除数组类型的最顶层维度，返回数组元素的类型。</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>result<span class="op">()</span> <span class="op">{</span> </span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"~result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span> </span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">&amp;&amp;</span> func<span class="op">(){</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    result r<span class="op">;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>move<span class="op">(</span>r<span class="op">);</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"first line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    result a<span class="op">;</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    a<span class="op">;</span> <span class="co">// lvalue</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    result<span class="op">();</span> <span class="co">// prvalue</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> result<span class="op">();</span> <span class="co">// prvalue</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> func<span class="op">();</span> <span class="co">// xvalue</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"last line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>我们可以看到， <code>a</code> 因为表达式的结果是可以获取地址的，所以<code>a</code>属于<code>lvalue</code>，<code>result()</code>因为计算结果是没有地址的，所以属于<code>prvalue</code>，而<code>func()</code> 返回的是快要消亡的具名对象，所以<code>func()</code>返回的是<code>xvalue</code>。</p>
-</section>
-<section id="右值生命周期延长规则" class="level2">
-<h2 class="anchored" data-anchor-id="右值生命周期延长规则">右值生命周期延长规则</h2>
-<p>当右值引用（<code>T&amp;&amp;</code>）或const左值引用（<code>const T&amp;</code>）绑定prvalue时，临时对象的生命周期会被延长至引用的作用域结束。</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>string<span class="op">&amp;</span> s1 <span class="op">=</span> <span class="st">"Hello"</span><span class="op">;</span>  <span class="co">// 临时字符串生命周期延长至s1作用域结束，内容不可变</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string<span class="op">&amp;&amp;</span> s2 <span class="op">=</span> <span class="bu">std::</span>string<span class="op">(</span><span class="st">"World"</span><span class="op">);</span>  <span class="co">// 临时对象生命周期延长至s2作用域结束，内容可变</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="c17-中-prvalue的变化" class="level2">
-<h2 class="anchored" data-anchor-id="c17-中-prvalue的变化">C++17 中 prvalue的变化</h2>
-<p>到了C++17， prvalue被弱化成只初始化对象，不再是不能被移动的临时对象。</p>
-<p>比如下面的代码</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NonCopyable <span class="op">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span> <span class="dt">int</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">()</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">(</span><span class="at">const</span> NonCopyable <span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span><span class="at">const</span> NonCopyable<span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> <span class="dt">int</span> i <span class="op">=</span> NonCopyable<span class="op">{};</span>                 <span class="co">//1</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> NonCopyable v <span class="op">=</span> NonCopyable<span class="op">{};</span>         <span class="co">//2</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>在C++17以前，2是不行的，这是因为 C++11 要求 RVO 或者 NRVO 也一定是需要有复制 / 移动构造函数的。而到了C++17，2是可以的，是因为 prvalue 仅仅只是一个初始化器，不是对象，不会发生拷贝，C++编译器会直接让prvalue对象在v的原地初始化，等价于<code>NonCopyable v{}</code>。 在汇编层面，会在进入函数之前传递v对象的地址，进入构造函数以后原地初始化。</p>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">friend</span> <span class="kw">class</span> __weak_ptr<span class="op">&lt;</span>_Tp<span class="op">,</span> _Lp<span class="op">&gt;;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ... 中间省略很多东西</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">element_type</span><span class="op">*</span>    _M_ptr<span class="op">;</span>         <span class="co">// Contained pointer.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      __shared_count<span class="op">&lt;</span>_Lp<span class="op">&gt;</span>  _M_refcount<span class="op">;</span>    <span class="co">// Reference counter.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>可以看到，shared 指针内部是有2个指针，第一个是指向原始对象的指针，第二个是引用计数的模块。</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>_Lock_policy _Lp <span class="op">=</span> __default_lock_policy<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> _Sp_counted_base</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">:</span> <span class="kw">public</span> _Mutex_base<span class="op">&lt;</span>_Lp<span class="op">&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        _Sp_counted_base<span class="op">()</span> <span class="kw">noexcept</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> _M_use_count<span class="op">(</span><span class="dv">1</span><span class="op">),</span> _M_weak_count<span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        _Sp_counted_base<span class="op">(</span>_Sp_counted_base <span class="at">const</span><span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        _Sp_counted_base<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span>_Sp_counted_base <span class="at">const</span><span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// _Atomic_word 是能够进行原子操作的最小类型，可能是int , long 等。</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        _Atomic_word  _M_use_count<span class="op">;</span>     <span class="co">// #shared</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        _Atomic_word  _M_weak_count<span class="op">;</span>    <span class="co">// #weak + (#shared != 0)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span>_Lock_policy _Lp<span class="op">&gt;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> __shared_count</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">constexpr</span> __shared_count<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">:</span> _M_pi<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 省略一大堆东西</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">friend</span> <span class="kw">class</span> __weak_count<span class="op">&lt;</span>_Lp<span class="op">&gt;;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        _Sp_counted_base<span class="op">&lt;</span>_Lp<span class="op">&gt;*</span>  _M_pi<span class="op">;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> _Ptr<span class="op">,</span> <span class="kw">typename</span> _Deleter<span class="op">,</span> <span class="kw">typename</span> _Alloc<span class="op">,</span> _Lock_policy _Lp<span class="op">&gt;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> _Sp_counted_deleter <span class="kw">final</span> <span class="op">:</span> <span class="kw">public</span> _Sp_counted_base<span class="op">&lt;</span>_Lp<span class="op">&gt;</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">class</span> _Impl <span class="op">:</span> _Sp_ebo_helper<span class="op">&lt;</span><span class="dv">0</span><span class="op">,</span> _Deleter<span class="op">&gt;,</span> _Sp_ebo_helper<span class="op">&lt;</span><span class="dv">1</span><span class="op">,</span> _Alloc<span class="op">&gt;</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="kw">typedef</span> _Sp_ebo_helper<span class="op">&lt;</span><span class="dv">0</span><span class="op">,</span> _Deleter<span class="op">&gt;</span> _Del_base<span class="op">;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="kw">typedef</span> _Sp_ebo_helper<span class="op">&lt;</span><span class="dv">1</span><span class="op">,</span> _Alloc<span class="op">&gt;</span>   _Alloc_base<span class="op">;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        _Impl<span class="op">(</span>_Ptr __p<span class="op">,</span> _Deleter __d<span class="op">,</span> <span class="at">const</span> _Alloc<span class="op">&amp;</span> __a<span class="op">)</span> <span class="kw">noexcept</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> _Del_base<span class="op">(</span><span class="bu">std::</span>move<span class="op">(</span>__d<span class="op">)),</span> _Alloc_base<span class="op">(</span>__a<span class="op">),</span> _M_ptr<span class="op">(</span>__p<span class="op">)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        _Deleter<span class="op">&amp;</span> _M_del<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> _Del_base<span class="op">::</span>_S_get<span class="op">(*</span><span class="kw">this</span><span class="op">);</span> <span class="op">}</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        _Alloc<span class="op">&amp;</span> _M_alloc<span class="op">()</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> _Alloc_base<span class="op">::</span>_S_get<span class="op">(*</span><span class="kw">this</span><span class="op">);</span> <span class="op">}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        _Ptr _M_ptr<span class="op">;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 省略一大堆东西</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>      _Impl _M_impl<span class="op">;</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>基础的<code>_Sp_counted_base</code> 类，有原子类型的 强引用计数和弱引用计数。 其有2个派生类</p>
+<ul>
+<li><code>_Sp_counted_ptr</code> ： 在 <code>_Sp_counted_base</code> ， 只有专门保存指向裸对象的指针。 一般在没有配置删除器和分配器函数的时候会被创建使用。</li>
+<li>还有其派生类<code>_Sp_counted_deleter</code>， 内部有个数据结构，专门保存指向裸对象的指针、删除器函数指针和分配器函数的指针。</li>
+</ul>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

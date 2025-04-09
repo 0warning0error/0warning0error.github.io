@@ -2,9 +2,11 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/lvalue-rvalue/index.html",
+      "/posts/memory-order/index.html",
+      "/posts/shared-ptr-inner/index.html",
       "/posts/designing-readers–writer-lock/index.html",
       "/posts/database-1/index.html",
-      "/posts/lvalue-rvalue/index.html",
       "/posts/io-uring/index.html",
       "/posts/thinking-of-trap-problem/index.html",
       "/posts/understanding-dijkstra-algorithm/index.html",

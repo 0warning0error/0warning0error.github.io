@@ -183,14 +183,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p><code>io_uring</code> 是 2019 年 Linux 5.1 内核首次引入的高性能异步 I/O 框架，能显著加速 I/O 密集型应用的性能。 它有如下优点： - 统一了 Linux 异步 I/O 框架： Linux AIO 只支持 direct I/O 模式的存储文件（storage file） - 在设计上是真正的异步 I/O</p>
+<p><code>io_uring</code> 是 2019 年 Linux 5.1 内核首次引入的高性能异步 I/O 框架，能显著加速 I/O 密集型应用的性能。 它有如下优点：</p>
+<ul>
+<li>统一了 Linux 异步 I/O 框架： Linux AIO 只支持 direct I/O 模式的存储文件（storage file）</li>
+<li>在设计上是真正的异步 I/O</li>
+</ul>
 <p>Linux中的IO复用发展已有很多年的历史。</p>
 <section id="linux-io复用历史" class="level1">
 <h1>Linux IO复用历史</h1>
 <section id="select-调用" class="level2">
 <h2 class="anchored" data-anchor-id="select-调用">select 调用</h2>
-<p><code>select</code> 是最早期的 I/O 复用机制之一。它允许一个程序监视多个文件描述符，以查看它们是否可读、可写或有错误条件出现。<code>select</code> 的主要特点是： - 简单易用，适合小规模的文件描述符集 - 跨平台支持广泛，几乎所有的 Unix 系统和类 Unix 系统都支持 <code>select</code></p>
-<p>然而，<code>select</code> 也存在明显的缺陷： - 每次调用 <code>select</code> 都需要重新传递文件描述符集，效率较低 - 文件描述符数量有限制（通常为 1024），不适用于高并发场景 - 随着文件描述符数量增加，性能急剧下降</p>
+<p><code>select</code> 是最早期的 I/O 复用机制之一。它允许一个程序监视多个文件描述符，以查看它们是否可读、可写或有错误条件出现。<code>select</code> 的主要特点是：</p>
+<ul>
+<li>简单易用，适合小规模的文件描述符集</li>
+<li>跨平台支持广泛，几乎所有的 Unix 系统和类 Unix 系统都支持 <code>select</code></li>
+</ul>
+<p>然而，<code>select</code> 也存在明显的缺陷：</p>
+<ul>
+<li>每次调用 <code>select</code> 都需要重新传递文件描述符集，效率较低</li>
+<li>文件描述符数量有限制（通常为 1024），不适用于高并发场景</li>
+<li>随着文件描述符数量增加，性能急剧下降</li>
+</ul>
 <p>假设我们有个叫is_ready的函数（非阻塞检测IO接口是否准备好了），select 的实现原理可以使用下面的伪代码表示：</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns true if fd is ready for I/O.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> is_ready<span class="op">(</span><span class="dt">int</span> fd<span class="op">);</span></span>
@@ -216,7 +229,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="poll-调用" class="level2">
 <h2 class="anchored" data-anchor-id="poll-调用">poll 调用</h2>
-<p>为了克服 <code>select</code> 的一些缺点，Linux 引入了 <code>poll</code> 调用。<code>poll</code> 的功能与 <code>select</code> 类似，但有以下改进： - 传递文件描述符集的方式更加灵活，避免了 <code>select</code> 中的复制开销 - 不存在文件描述符数量的硬性限制，可以处理更大的文件描述符集</p>
+<p>为了克服 <code>select</code> 的一些缺点，Linux 引入了 <code>poll</code> 调用。<code>poll</code> 的功能与 <code>select</code> 类似，但有以下改进：</p>
+<ul>
+<li>传递文件描述符集的方式更加灵活，避免了 <code>select</code> 中的复制开销</li>
+<li>不存在文件描述符数量的硬性限制，可以处理更大的文件描述符集</li>
+</ul>
 <p>假设我们有个叫is_ready的函数（非阻塞检测IO接口是否准备好了），select 的实现原理可以使用下面的伪代码表示：</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns true if fd is ready for I/O.</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> is_ready<span class="op">(</span><span class="dt">int</span> fd<span class="op">);</span></span>
@@ -244,7 +261,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="epoll-调用" class="level2">
 <h2 class="anchored" data-anchor-id="epoll-调用">epoll 调用</h2>
-<p>为了进一步提高 I/O 复用的性能，Linux 2.5.44 版本引入了 <code>epoll</code>。<code>epoll</code> 相比 <code>select</code> 和 <code>poll</code> 有显著的性能优势，特别是在处理大量文件描述符时。<code>epoll</code> 的主要特点包括： - 使用事件驱动机制，只在文件描述符状态改变时通知应用程序，避免了不必要的扫描 - 支持边缘触发（edge-triggered）和水平触发（level-triggered）模式，更加灵活 - 提供了 <code>epoll_create</code>、<code>epoll_ctl</code> 和 <code>epoll_wait</code> 接口，便于管理和使用 假设我们有一个<code>add_monitor</code>函数，会事件循环监测all_fds的变化。epoll相关函数的伪代码如下</p>
+<p>为了进一步提高 I/O 复用的性能，Linux 2.5.44 版本引入了 <code>epoll</code>。<code>epoll</code> 相比 <code>select</code> 和 <code>poll</code> 有显著的性能优势，特别是在处理大量文件描述符时。<code>epoll</code> 的主要特点包括：</p>
+<ul>
+<li>使用事件驱动机制，只在文件描述符状态改变时通知应用程序，避免了不必要的扫描</li>
+<li>支持边缘触发（edge-triggered）和水平触发（level-triggered）模式，更加灵活</li>
+<li>提供了 <code>epoll_create</code>、<code>epoll_ctl</code> 和 <code>epoll_wait</code> 接口，便于管理和使用</li>
+</ul>
+<p>假设我们有一个<code>add_monitor</code>函数，会事件循环监测all_fds的变化。epoll相关函数的伪代码如下</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Start monitoring fds in `all_fds` and constantly adds ready ones to</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// `ready_fds`.</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> add_monitor<span class="op">(</span><span class="dt">const</span> vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;&amp;</span> all_fds<span class="op">,</span> vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;&amp;</span> ready_fds<span class="op">);</span></span>
@@ -291,7 +314,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="io_uring-的出现" class="level2">
 <h2 class="anchored" data-anchor-id="io_uring-的出现">io_uring 的出现</h2>
-<p><code>io_uring</code> 的引入标志着 Linux I/O 复用的一个新高度。相较于之前的机制，<code>io_uring</code> 提供了更高的性能和更低的延迟，特别适用于 I/O 密集型应用。其主要优势包括： - 通过环形缓冲区实现真正的异步 I/O，无需频繁的系统调用 - 支持多种 I/O 操作类型，不仅限于文件描述符 - 更高效的事件通知机制，减少了应用程序和内核之间的交互开销</p>
+<p><code>io_uring</code> 的引入标志着 Linux I/O 复用的一个新高度。相较于之前的机制，<code>io_uring</code> 提供了更高的性能和更低的延迟，特别适用于 I/O 密集型应用。其主要优势包括：</p>
+<ul>
+<li>通过环形缓冲区实现真正的异步 I/O，无需频繁的系统调用</li>
+<li>支持多种 I/O 操作类型，不仅限于文件描述符</li>
+<li>更高效的事件通知机制，减少了应用程序和内核之间的交互开销</li>
+</ul>
 
 
 </section>

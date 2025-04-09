@@ -9,7 +9,7 @@
 <meta name="author" content="0warning0error">
 <meta name="dcterms.date" content="2025-04-07">
 
-<title>左值和右值 – 编程之眼</title>
+<title>C++的内存序 – 编程之眼</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -144,7 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">左值和右值</h1>
+      <h1 class="title">C++的内存序</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">C++</div>
               </div>
@@ -183,72 +183,108 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>C++的左值和右值是比较有理解难度的概念。每个 C++ 表达式都有一个类型，属于某个值类别。 值类别是编译器在表达式计算期间创建、复制和移动临时对象时必须遵循的规则的基础。</p>
-<p>在C++11中，值类型有以下分类：</p>
+<section id="什么是内存序" class="level2">
+<h2 class="anchored" data-anchor-id="什么是内存序">什么是内存序</h2>
+<p>在现代CPU中，指令的执行顺序可能会被CPU重排序，乱序执行从而提高执行的性能。这导致在某些情况在任意时刻得到的结果并不会按照预期顺序执行的一样。内存序就是控制CPU重排序的程度。</p>
+<p>C++11 为<code>std::atomic</code>提供了 6 种 memory ordering:</p>
 <ul>
-<li><p>prvalue 是一个表达式，计算结果可以用于初始化对象或位域，或计算运算符的操作数值</p></li>
-<li><p>xvalue 是一个表达式，表示一个对象或位域，该对象或位域的资源可重复使用（通常是因为它接近其生存期的末尾）。 比如：<code>std::move</code>的结果，和返回右值引用的函数</p></li>
-<li><p>lvalue 是一个表达式，计算结果可以确定对象、位域或函数的标识</p></li>
+<li>memory_order_relaxed</li>
+<li>memory_order_consume（不用了解，用的少，而且C++26也要放弃它）</li>
+<li>memory_order_acquire</li>
+<li>memory_order_release</li>
+<li>memory_order_acq_rel</li>
+<li>memory_order_seq_cst</li>
 </ul>
-<section id="例子" class="level2">
-<h2 class="anchored" data-anchor-id="例子">例子</h2>
-<p>为了方便理解， 下面可以看看一些例子：</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;utility&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> result <span class="op">{</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span><span class="op">:</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a<span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    result<span class="op">()</span> <span class="op">:</span> a<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">{</span> </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">~</span>result<span class="op">()</span> <span class="op">{</span> </span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"~result"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span> </span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">&amp;&amp;</span> func<span class="op">(){</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    result r<span class="op">;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">std::</span>move<span class="op">(</span>r<span class="op">);</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"first line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    result a<span class="op">;</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    a<span class="op">;</span> <span class="co">// lvalue</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    result<span class="op">();</span> <span class="co">// prvalue</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> result<span class="op">();</span> <span class="co">// prvalue</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    result<span class="op">&amp;&amp;</span> r <span class="op">=</span> func<span class="op">();</span> <span class="co">// xvalue</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"last line of main"</span> <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>我们可以看到， <code>a</code> 因为表达式的结果是可以获取地址的，所以<code>a</code>属于<code>lvalue</code>，<code>result()</code>因为计算结果是没有地址的，所以属于<code>prvalue</code>，而<code>func()</code> 返回的是快要消亡的具名对象，所以<code>func()</code>返回的是<code>xvalue</code>。</p>
+<p>默认情况下，<code>std::atomic</code>使用的是 <code>memory_order_seq_cst</code>。 但在某些场景下，合理使用其它的内存序，可以让编译器优化生成的代码，从而提高性能。</p>
 </section>
-<section id="右值生命周期延长规则" class="level2">
-<h2 class="anchored" data-anchor-id="右值生命周期延长规则">右值生命周期延长规则</h2>
-<p>当右值引用（<code>T&amp;&amp;</code>）或const左值引用（<code>const T&amp;</code>）绑定prvalue时，临时对象的生命周期会被延长至引用的作用域结束。</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="bu">std::</span>string<span class="op">&amp;</span> s1 <span class="op">=</span> <span class="st">"Hello"</span><span class="op">;</span>  <span class="co">// 临时字符串生命周期延长至s1作用域结束，内容不可变</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string<span class="op">&amp;&amp;</span> s2 <span class="op">=</span> <span class="bu">std::</span>string<span class="op">(</span><span class="st">"World"</span><span class="op">);</span>  <span class="co">// 临时对象生命周期延长至s2作用域结束，内容可变</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="relaxed-序" class="level2">
+<h2 class="anchored" data-anchor-id="relaxed-序">relaxed 序</h2>
+<p>在这种模型下，Relaxed 内存序仅仅保证load()和store()是原子操作，除此之外，不提供任何跨线程的同步。</p>
+<p>例如对于初始值为0的 x 和 y，</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程 1：</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>r1 <span class="op">=</span> y<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_relaxed<span class="op">);</span> <span class="co">// A</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>store<span class="op">(</span>r1<span class="op">,</span> <span class="bu">std::</span>memory_order_relaxed<span class="op">);</span> <span class="co">// B</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程 2：</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> x<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_relaxed<span class="op">);</span> <span class="co">// C </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>store<span class="op">(</span><span class="dv">42</span><span class="op">,</span> <span class="bu">std::</span>memory_order_relaxed<span class="op">);</span> <span class="co">// D</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>有可能会出现<code>r1 == r2 == 42</code>, 即使线程1中A先于B执行 且线程 2 中 C 先于 D执行，却无法避免CPU乱序执行，D 会出现于 A 之前，B 会出现于 C 之前，最后形成D A B C 的执行顺序。</p>
+<p>Relaxed 内存序的典型的应用是计数器自增，std::shared_ptr 的引用计数器，因为这只要求原子性，但不要求定序或同步（注意 std::shared_ptr 计数器的自减要求与析构函数间进行获得-释放同步）。</p>
 </section>
-<section id="c17-中-prvalue的变化" class="level2">
-<h2 class="anchored" data-anchor-id="c17-中-prvalue的变化">C++17 中 prvalue的变化</h2>
-<p>到了C++17， prvalue被弱化成只初始化对象，不再是不能被移动的临时对象。</p>
-<p>比如下面的代码</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> NonCopyable <span class="op">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">operator</span> <span class="dt">int</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">()</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">(</span><span class="at">const</span> NonCopyable <span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    NonCopyable<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span><span class="at">const</span> NonCopyable<span class="op">&amp;)</span> <span class="op">=</span> <span class="kw">delete</span><span class="op">;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> <span class="dt">int</span> i <span class="op">=</span> NonCopyable<span class="op">{};</span>                 <span class="co">//1</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">maybe_unused</span><span class="op">]]</span> NonCopyable v <span class="op">=</span> NonCopyable<span class="op">{};</span>         <span class="co">//2</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>在C++17以前，2是不行的，这是因为 C++11 要求 RVO 或者 NRVO 也一定是需要有复制 / 移动构造函数的。而到了C++17，2是可以的，是因为 prvalue 仅仅只是一个初始化器，不是对象，不会发生拷贝，C++编译器会直接让prvalue对象在v的原地初始化，等价于<code>NonCopyable v{}</code>。 在汇编层面，会在进入函数之前传递v对象的地址，进入构造函数以后原地初始化。</p>
+<section id="release-acquire-序" class="level2">
+<h2 class="anchored" data-anchor-id="release-acquire-序">release-acquire 序</h2>
+<p>若线程 A 中的一个原子以memory_order_release的内存序store ，而线程 B 中从同一变量以memory_order_acquire原子load，且线程 B 中的加载读到了线程 A 中的存储所写入的值，则线程 A 中的存储同步于线程 B 中的加载。从线程 A 的视角先发生于原子存储的所有内存写入（包括非原子及宽松原子的），在线程 B 中一旦原子加载完成，则保证线程 B 能观察到线程 A 写入内存的所有内容。（这其实是同步点的概念）仅当 B 实际上返回了 A 所存储的值或其释放序列中后面的值时，才有此保证。 也就是说，如果B读到了A原子写入的值，那么A原子写入的前面所有的操作都能被B看见</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;atomic&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;cassert&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;string&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;thread&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>atomic<span class="op">&lt;</span><span class="bu">std::</span>string<span class="op">*&gt;</span> ptr<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> data<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> producer<span class="op">()</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>string<span class="op">*</span> p <span class="op">=</span> <span class="kw">new</span> <span class="bu">std::</span>string<span class="op">(</span><span class="st">"Hello"</span><span class="op">);</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ptr<span class="op">.</span>store<span class="op">(</span>p<span class="op">,</span> <span class="bu">std::</span>memory_order_release<span class="op">);</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> consumer<span class="op">()</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>string<span class="op">*</span> p2<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(!(</span>p2 <span class="op">=</span> ptr<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_acquire<span class="op">)))</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(*</span>p2 <span class="op">==</span> <span class="st">"Hello"</span><span class="op">);</span> <span class="co">// 一定能读到p2指向的字符串对象</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="ot">assert</span><span class="op">(</span>data <span class="op">==</span> <span class="dv">42</span><span class="op">);</span> <span class="co">// 一定能读到data值为42</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>thread t1<span class="op">(</span>producer<span class="op">);</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>thread t2<span class="op">(</span>consumer<span class="op">);</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    t1<span class="op">.</span>join<span class="op">();</span> t2<span class="op">.</span>join<span class="op">();</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="seq_cst-序" class="level2">
+<h2 class="anchored" data-anchor-id="seq_cst-序">seq_cst 序</h2>
+<p>seq_cst 序是C++中最严格的内存顺序模型，它保证了所有线程看到的内存操作顺序与代码编写顺序一致，且所有操作形成一个全局唯一的执行顺序。以下是通俗解释：</p>
+<p>想象所有使用<code>memory_order_seq_cst</code>的操作被排成一个<strong>全局队列</strong>，所有线程看到的操作顺序完全相同。例如： - 线程A先写变量<code>x</code>，线程B后写变量<code>y</code>，则所有线程都会观察到<code>x</code>的修改发生在<code>y</code>之前。 - 即使不同线程的操作涉及不同变量，它们的顺序在全局队列中也是固定的。</p>
+<p>例如：</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>store<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// 操作A</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>store<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// 操作B</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> a <span class="op">=</span> y<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// 操作C</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> b <span class="op">=</span> x<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// 操作D</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>所有线程会看到操作顺序为A→B→C→D，或A→C→B→D等，但不会出现B在A之前的情况。</p>
+<section id="场景" class="level3">
+<h3 class="anchored" data-anchor-id="场景">场景</h3>
+<ul>
+<li><strong>避免矛盾观察</strong>：若两个线程分别修改<code>x</code>和<code>y</code>，其他线程无法看到<code>x</code>先改后<code>y</code>改，同时另一线程看到<code>y</code>先改后<code>x</code>改的情况。</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程1修改x和y（顺序一致）</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>store<span class="op">(</span><span class="kw">true</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>store<span class="op">(</span><span class="kw">true</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程2和3分别读取</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">// 所有线程看到的顺序要么x→y，要么y→x，但不会矛盾。</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>然而，一旦混用非Seq-Cst操作，全局一致性可能被破坏。例如：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程1（Seq-Cst写x，Release写y）</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>x<span class="op">.</span>store<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// A</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>store<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="bu">std::</span>memory_order_release<span class="op">);</span> <span class="co">// B</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程2（Seq-Cst读y，Relaxed读y）</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>r1 <span class="op">=</span> y<span class="op">.</span>fetch_add<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// C</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> y<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_relaxed<span class="op">);</span>         <span class="co">// D</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">// 线程3（Seq-Cst写y，Seq-Cst读x）</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>y<span class="op">.</span>store<span class="op">(</span><span class="dv">3</span><span class="op">,</span> <span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// E</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>r3 <span class="op">=</span> x<span class="op">.</span>load<span class="op">(</span><span class="bu">std::</span>memory_order_seq_cst<span class="op">);</span> <span class="co">// F</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>可能出现<code>r1=1, r2=3, r3=0</code>，即线程3的读操作<code>F</code>看到<code>x</code>的旧值（0），因为全局顺序可能是C→E→F→A。</p>
+<p>Seq-Cst操作需要插入硬件级内存屏障（如x86的<code>mfence</code>），强制所有核心同步内存状态，导致较高开销。所以需要所有线程对操作顺序达成一致时（如分布式锁、严格顺序计数器）才会考虑使用。</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
