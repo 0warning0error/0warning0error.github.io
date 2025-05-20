@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/dive-into-thread-local-value/index.html",
       "/posts/lvalue-rvalue/index.html",
       "/posts/memory-order/index.html",
       "/posts/shared-ptr-inner/index.html",
@@ -9,6 +10,7 @@
       "/posts/database-1/index.html",
       "/posts/io-uring/index.html",
       "/posts/thinking-of-trap-problem/index.html",
+      "/posts/thread-safe-method/index.html",
       "/posts/understanding-dijkstra-algorithm/index.html",
       "/posts/convert-recursion-into-iteration/english.html",
       "/posts/convert-recursion-into-iteration/index.html",
