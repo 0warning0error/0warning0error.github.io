@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/trade-strategy/index.html",
       "/posts/dive-into-thread-local-value/index.html",
       "/posts/lvalue-rvalue/index.html",
       "/posts/memory-order/index.html",

@@ -9,56 +9,60 @@
     <lastmod>2024-06-27T17:09:37.596Z</lastmod>
   </url>
   <url>
-    <loc>https://0warning0error.github.io/posts/thinking-of-trap-problem/index.html</loc>
-    <lastmod>2025-03-03T04:38:29.870Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/memory-order/index.html</loc>
-    <lastmod>2025-04-09T06:11:40.877Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/io-uring/index.html</loc>
-    <lastmod>2025-04-08T09:51:18.266Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/designing-readers–writer-lock/index.html</loc>
-    <lastmod>2025-04-05T14:08:49.141Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/convert-recursion-into-iteration/index.html</loc>
-    <lastmod>2024-06-28T06:14:35.680Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/index.html</loc>
-    <lastmod>2024-06-19T16:26:10.802Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/about.html</loc>
-    <lastmod>2025-04-05T14:12:35.939Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/convert-recursion-into-iteration/english.html</loc>
-    <lastmod>2024-06-28T06:16:27.023Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/database-1/index.html</loc>
-    <lastmod>2025-04-05T14:29:18.559Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/dive-into-thread-local-value/index.html</loc>
-    <lastmod>2025-05-20T14:59:40.219Z</lastmod>
-  </url>
-  <url>
-    <loc>https://0warning0error.github.io/posts/lvalue-rvalue/index.html</loc>
-    <lastmod>2025-04-10T13:28:28.120Z</lastmod>
+    <loc>https://0warning0error.github.io/posts/thread-safe-method/index.html</loc>
+    <lastmod>2025-04-13T02:26:31.948Z</lastmod>
   </url>
   <url>
     <loc>https://0warning0error.github.io/posts/shared-ptr-inner/index.html</loc>
     <lastmod>2025-04-08T13:26:56.397Z</lastmod>
   </url>
   <url>
-    <loc>https://0warning0error.github.io/posts/thread-safe-method/index.html</loc>
-    <lastmod>2025-04-13T02:26:31.948Z</lastmod>
+    <loc>https://0warning0error.github.io/posts/lvalue-rvalue/index.html</loc>
+    <lastmod>2025-04-10T13:28:28.120Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/dive-into-thread-local-value/index.html</loc>
+    <lastmod>2025-06-06T15:19:59.141Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/database-1/index.html</loc>
+    <lastmod>2025-04-05T14:29:18.559Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/convert-recursion-into-iteration/english.html</loc>
+    <lastmod>2024-06-28T06:16:27.023Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/about.html</loc>
+    <lastmod>2025-04-05T14:12:35.939Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/index.html</loc>
+    <lastmod>2024-06-19T16:26:10.802Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/convert-recursion-into-iteration/index.html</loc>
+    <lastmod>2024-06-28T06:14:35.680Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/designing-readers–writer-lock/index.html</loc>
+    <lastmod>2025-04-05T14:08:49.141Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/io-uring/index.html</loc>
+    <lastmod>2025-04-08T09:51:18.266Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/memory-order/index.html</loc>
+    <lastmod>2025-04-09T06:11:40.877Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/thinking-of-trap-problem/index.html</loc>
+    <lastmod>2025-03-03T04:38:29.870Z</lastmod>
+  </url>
+  <url>
+    <loc>https://0warning0error.github.io/posts/trade-strategy/index.html</loc>
+    <lastmod>2025-06-06T17:00:35.925Z</lastmod>
   </url>
   <url>
     <loc>https://0warning0error.github.io/posts/trying-to-intergrate-z3-into-typst/index.html</loc>
